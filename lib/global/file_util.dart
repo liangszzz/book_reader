@@ -13,7 +13,14 @@ class FileUtil {
     String content = file.readAsStringSync();
     List<BookInfo> list;
     try {
-      list = jsonDecode(content);
+      List<BookInfo> infos = new List();
+
+      List<dynamic> convert = jsonDecode(content);
+      convert.forEach((e) {
+        BookInfo info = BookInfo.fromJson(e);
+        infos.add(info);
+      });
+      list = infos;
     } catch (e) {
       list = List();
       saveLogToFile(e.toString());

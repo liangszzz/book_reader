@@ -24,31 +24,29 @@ class _BookShelfState extends State<BookShelf> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("shelf"),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: _search,
-          ),
-          PopupMenuButton<Choice>(
-            onSelected: _select,
-            itemBuilder: (context) {
-              return choices.map((Choice choice) {
-                return new PopupMenuItem<Choice>(
-                  value: choice,
-                  child: new Text(choice.title),
-                );
-              }).toList();
-            },
-          )
-        ],
-      ),
-      body: Center(
-        child: _buildBookList(),
-      ),
-      bottomNavigationBar: Text("bottom"),
-    );
+        appBar: AppBar(
+          title: Text("shelf"),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.search),
+              onPressed: _search,
+            ),
+            PopupMenuButton<Choice>(
+              onSelected: _select,
+              itemBuilder: (context) {
+                return choices.map((Choice choice) {
+                  return new PopupMenuItem<Choice>(
+                    value: choice,
+                    child: new Text(choice.title),
+                  );
+                }).toList();
+              },
+            )
+          ],
+        ),
+        body: Center(
+          child: _buildBookList(),
+        ));
   }
 
   void _addBookToShelf() {
@@ -61,28 +59,49 @@ class _BookShelfState extends State<BookShelf> {
   }
 
   Widget _buildBookList() {
-    return ListView.builder(
-        itemCount: GlobalInfo.bookShelf.length,
+    return ListView.separated(
         itemBuilder: (context, i) {
           return _buildRow(context, i);
-        });
+        },
+        separatorBuilder: (buildContext, i) {
+          return Divider(
+            height: 2,
+          );
+        },
+        itemCount: GlobalInfo.bookShelf.length);
   }
 
+  //Text(GlobalInfo.bookShelf.elementAt(i).bookName)
   Widget _buildRow(context, i) {
-    return Column(
-      children: <Widget>[
-        Row(
-          children: <Widget>[
-            Text(GlobalInfo.bookShelf.elementAt(i).bookName),
-            SizedBox(
-              width: 100,
-            ),
-            Text("阅读")
-          ],
-        ),
-        Divider()
-      ],
-    );
+    return Container(
+        child: GestureDetector(
+      onTap: _toRead,
+      child: Row(
+        children: <Widget>[
+          Image.network(
+              "https://avatars0.githubusercontent.com/oa/684016?s=100&u=f544165ce20123a66e6b9a3e3ce656887702b9d3&v=4"),
+          Column(
+            children: <Widget>[
+              Text("绝对一番"),
+              Text("海底漫步者 11章未读"),
+              Text("20小时前 第二百章 穿越者之耻")
+            ],
+          ),
+          Expanded(
+              child: PopupMenuButton<Choice>(
+            onSelected: _select,
+            itemBuilder: (context) {
+              return choices.map((Choice choice) {
+                return new PopupMenuItem<Choice>(
+                  value: choice,
+                  child: new Text(choice.title),
+                );
+              }).toList();
+            },
+          ))
+        ],
+      ),
+    ));
   }
 
   @override
@@ -109,6 +128,10 @@ class _BookShelfState extends State<BookShelf> {
 
   void _search() {
     print("#search");
+  }
+
+  void _toRead() {
+    print("##read");
   }
 }
 

@@ -3,14 +3,13 @@ import 'dart:io';
 import 'package:book_reader/entity/book_info.dart';
 import 'package:book_reader/global/file_util.dart';
 import 'package:book_reader/global/global_info.dart';
+import 'package:book_reader/pages/book_reader/book_reader.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class BookShelf extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() {
-    return _BookShelfState();
-  }
+  State<StatefulWidget> createState() => _BookShelfState();
 }
 
 class _BookShelfState extends State<BookShelf> {
@@ -71,15 +70,13 @@ class _BookShelfState extends State<BookShelf> {
         itemCount: GlobalInfo.bookShelf.length);
   }
 
-  //Text(GlobalInfo.bookShelf.elementAt(i).bookName)
   Widget _buildRow(context, i) {
     return Container(
         child: GestureDetector(
       onTap: _toRead,
       child: Row(
         children: <Widget>[
-          Image.network(
-              "https://avatars0.githubusercontent.com/oa/684016?s=100&u=f544165ce20123a66e6b9a3e3ce656887702b9d3&v=4"),
+          Image.network("https://bookcover.yuewen.com/qdbimg/349573/1016218809/180",height: 120,width: 60,),
           Column(
             children: <Widget>[
               Text("绝对一番"),
@@ -131,7 +128,14 @@ class _BookShelfState extends State<BookShelf> {
   }
 
   void _toRead() {
-    print("##read");
+    Navigator.push(
+        context,
+        PageRouteBuilder(
+          opaque: false,
+          pageBuilder: (BuildContext context, _, __) {
+            return BookReader(bookName: "app reader");
+          },
+        ));
   }
 }
 

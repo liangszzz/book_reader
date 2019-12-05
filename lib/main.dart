@@ -1,3 +1,4 @@
+import 'dart:io';
 
 import 'package:book_reader/global/global_info.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +29,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    GlobalInfo.loadAppSetting();
   }
 
   @override

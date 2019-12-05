@@ -1,9 +1,9 @@
 import 'dart:io';
 
+import 'package:book_reader/dao/book_shelf_dao.dart';
 import 'package:book_reader/entity/book_info.dart';
-import 'package:book_reader/global/file_util.dart';
 import 'package:book_reader/global/global_info.dart';
-import 'package:book_reader/pages/book_reader/book_reader.dart';
+import 'package:book_reader/pages/book_reader.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -13,6 +13,20 @@ class BookShelf extends StatefulWidget {
 }
 
 class _BookShelfState extends State<BookShelf> {
+  @override
+  void initState() {
+    super.initState();
+
+    if (GlobalInfo.bookShelf == null || GlobalInfo.bookShelf.isEmpty) {
+      BookShelfDao.loadBookShelf().then((value) {
+        setState(() {
+          GlobalInfo.bookShelf = value;
+        });
+      });
+    }
+    sleep(Duration(milliseconds: 50));
+  }
+
   List<Choice> choices = const <Choice>[
     const Choice(title: '添加', icon: Icons.add),
     const Choice(title: '全选', icon: Icons.select_all),
@@ -76,7 +90,11 @@ class _BookShelfState extends State<BookShelf> {
       onTap: _toRead,
       child: Row(
         children: <Widget>[
-          Image.network("https://bookcover.yuewen.com/qdbimg/349573/1016218809/180",height: 120,width: 60,),
+          Image.network(
+            "https://bookcover.yuewen.com/qdbimg/349573/1016218809/180",
+            height: 120,
+            width: 60,
+          ),
           Column(
             children: <Widget>[
               Text("绝对一番"),
@@ -101,24 +119,11 @@ class _BookShelfState extends State<BookShelf> {
     ));
   }
 
-  @override
-  void initState() {
-    super.initState();
-    if (GlobalInfo.bookShelf == null || GlobalInfo.bookShelf.isEmpty) {
-      FileUtil.getBooksFromFile().then((value) {
-        setState(() {
-          GlobalInfo.bookShelf = value;
-        });
-      });
-    }
-    sleep(Duration(milliseconds: 50));
-  }
-
   void _select(Choice value) {
     if (value.icon == Icons.add) {
       _addBookToShelf();
     } else if (value.icon == Icons.save) {
-      FileUtil.saveBookShelfToFile();
+      BookShelfDao.saveBookShelfToFile();
     } else
       print(value.title);
   }
@@ -133,7 +138,7 @@ class _BookShelfState extends State<BookShelf> {
         PageRouteBuilder(
           opaque: false,
           pageBuilder: (BuildContext context, _, __) {
-            return BookReader(bookName: "app reader");
+            return BookReader(bookName: "绝对一番");
           },
         ));
   }

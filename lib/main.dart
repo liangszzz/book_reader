@@ -1,6 +1,8 @@
+
+import 'package:book_reader/global/global_info.dart';
 import 'package:flutter/material.dart';
 import 'global/theme_data.dart';
-import 'pages/book_shelf/book_shelf.dart';
+import 'pages/book_shelf.dart';
 
 void main() => runApp(App());
 
@@ -23,8 +25,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
-
+  @override
+  void initState() {
+    super.initState();
+    GlobalInfo.loadAppSetting();
+  }
 
   @override
   Widget build(BuildContext context) {

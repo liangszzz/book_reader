@@ -18,7 +18,7 @@ class AppSettingDao {
       LogDao.saveLogToFile(e.toString());
       setting = AppSetting();
       setting.shelfFile = "/shelf.json";
-      setting.logFile = "/log.json";
+      setting.logFile = "/log.log";
       setting.booksFile = "/books.json";
       saveAppSettingToFile();
     }

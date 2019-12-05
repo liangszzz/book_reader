@@ -5,7 +5,7 @@ class AppSetting {
 
   String logFile;
 
-  AppSetting(){}
+  AppSetting();
 
   AppSetting.fromJson(Map<String, dynamic> map) {
     this.booksFile = map["booksFile"];

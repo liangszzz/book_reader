@@ -1,8 +1,5 @@
-import 'dart:io';
-
 import 'package:book_reader/dao/book_shelf_dao.dart';
 import 'package:book_reader/entity/book_info.dart';
-import 'package:book_reader/global/global_info.dart';
 import 'package:book_reader/pages/book_reader.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -13,26 +10,17 @@ class BookShelf extends StatefulWidget {
 }
 
 class _BookShelfState extends State<BookShelf> {
+  List<BookInfo> shelf = List<BookInfo>();
+
   @override
   void initState() {
     super.initState();
-
-    if (GlobalInfo.bookShelf == null || GlobalInfo.bookShelf.isEmpty) {
-      BookShelfDao.loadBookShelf().then((value) {
-        setState(() {
-          GlobalInfo.bookShelf = value;
-        });
+    BookShelfDao.loadBookShelf().then((value) {
+      setState(() {
+        shelf = value;
       });
-    }
-    sleep(Duration(milliseconds: 50));
+    });
   }
-
-  List<Choice> choices = const <Choice>[
-    const Choice(title: '添加', icon: Icons.add),
-    const Choice(title: '全选', icon: Icons.select_all),
-    const Choice(title: '清除', icon: Icons.clear_all),
-    const Choice(title: '保存', icon: Icons.save),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -41,18 +29,27 @@ class _BookShelfState extends State<BookShelf> {
           title: Text("shelf"),
           actions: <Widget>[
             IconButton(
+              // action button
               icon: Icon(Icons.search),
               onPressed: _search,
             ),
-            PopupMenuButton<Choice>(
-              onSelected: _select,
+            PopupMenuButton<String>(
+              onSelected: _selectBtn,
               itemBuilder: (context) {
-                return choices.map((Choice choice) {
-                  return new PopupMenuItem<Choice>(
-                    value: choice,
-                    child: new Text(choice.title),
-                  );
-                }).toList();
+                return <PopupMenuEntry<String>>[
+                  PopupMenuItem(
+                    value: "add",
+                    child: Text("添加"),
+                  ),
+                  PopupMenuItem(
+                    value: "select_all",
+                    child: Text("全选"),
+                  ),
+                  PopupMenuItem(
+                    value: "save_all",
+                    child: Text("保存"),
+                  )
+                ];
               },
             )
           ],
@@ -60,15 +57,6 @@ class _BookShelfState extends State<BookShelf> {
         body: Center(
           child: _buildBookList(),
         ));
-  }
-
-  void _addBookToShelf() {
-    BookInfo bookInfo = BookInfo();
-    bookInfo.bookName = "绝对";
-
-    setState(() {
-      GlobalInfo.bookShelf.add(bookInfo);
-    });
   }
 
   Widget _buildBookList() {
@@ -81,51 +69,45 @@ class _BookShelfState extends State<BookShelf> {
             height: 2,
           );
         },
-        itemCount: GlobalInfo.bookShelf.length);
+        itemCount: shelf.length);
   }
 
   Widget _buildRow(context, i) {
+    BookInfo bookInfo = shelf[i];
     return Container(
         child: GestureDetector(
       onTap: _toRead,
       child: Row(
         children: <Widget>[
-          Image.network(
-            "https://bookcover.yuewen.com/qdbimg/349573/1016218809/180",
-            height: 120,
-            width: 60,
-          ),
-          Column(
-            children: <Widget>[
-              Text("绝对一番"),
-              Text("海底漫步者 11章未读"),
-              Text("20小时前 第二百章 穿越者之耻")
-            ],
-          ),
+          bookInfo.imgPath == null
+              ? Image.network(
+                  "https://cdn.jsdelivr.net/gh/flutterchina/website@1.0/images/flutter-mark-square-100.png")
+              : Image.network(bookInfo.imgPath),
           Expanded(
-              child: PopupMenuButton<Choice>(
-            onSelected: _select,
-            itemBuilder: (context) {
-              return choices.map((Choice choice) {
-                return new PopupMenuItem<Choice>(
-                  value: choice,
-                  child: new Text(choice.title),
-                );
-              }).toList();
-            },
-          ))
+            child: Column(
+              children: <Widget>[
+                Text(bookInfo.bookName),
+                Text("  3张未读"),
+                Text("20小时前 第二百章 穿越者之耻")
+              ],
+            ),
+          ),
+          IconButton(icon: Icon(Icons.delete), onPressed: _deleteBook(i))
         ],
       ),
     ));
   }
 
-  void _select(Choice value) {
-    if (value.icon == Icons.add) {
-      _addBookToShelf();
-    } else if (value.icon == Icons.save) {
-      BookShelfDao.saveBookShelfToFile();
-    } else
-      print(value.title);
+  void _addBookToShelf() {
+    BookInfo bookInfo = BookInfo();
+    bookInfo.bookName = "绝对一番";
+    bookInfo.author = "海底捞";
+    bookInfo.imgPath =
+        "https://www.biquge.info/files/article/image/71/71513/71513s.jpg";
+
+    setState(() {
+      shelf.add(bookInfo);
+    });
   }
 
   void _search() {
@@ -142,11 +124,28 @@ class _BookShelfState extends State<BookShelf> {
           },
         ));
   }
-}
 
-class Choice {
-  const Choice({this.title, this.icon});
+  void _selectBtn(String f) {
+    switch (f) {
+      case "add":
+        _addBookToShelf();
+        break;
+      case "select_all":
+        _selectAll();
+        break;
+      case "save_all":
+        _saveShelf();
+        break;
+    }
+  }
 
-  final String title;
-  final IconData icon;
+  void _selectAll() {}
+
+  _deleteBook(index) {
+    shelf.removeAt(index);
+  }
+
+  void _saveShelf() {
+    BookShelfDao.saveBookShelfToFile(shelf);
+  }
 }

@@ -1,14 +1,25 @@
 import 'dart:io';
 
-import 'package:book_reader/global/global_info.dart';
 import 'package:path_provider/path_provider.dart';
 
 class LogDao {
-  static void saveLogToFile(String exception) async {
-    print("###error###  " + exception);
-    Directory directory = await getExternalStorageDirectory();
-    File file = new File(directory.path + GlobalInfo.appSetting.logFile);
+  String _logFile = "/log.txt";
+
+  Directory _directory;
+
+  LogDao() {
+    getExternalStorageDirectory().then((value) {
+      _directory = value;
+    });
+  }
+
+  void saveLogToFile(String log) async {
+    print("###error###  " + log);
+    if (_directory == null) {
+      _directory = await getExternalStorageDirectory();
+    }
+    File file = File(_directory.path + _logFile);
     var randomAccessFile = await file.open(mode: FileMode.writeOnlyAppend);
-    randomAccessFile.writeString(exception + "\n");
+    randomAccessFile.writeString(log + "\n");
   }
 }

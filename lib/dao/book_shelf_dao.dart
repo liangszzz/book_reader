@@ -1,40 +1,56 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:book_reader/dao/log_dao.dart';
 import 'package:book_reader/entity/book_info.dart';
 import 'package:book_reader/global/global_info.dart';
+import 'package:path_provider/path_provider.dart';
 
 class BookShelfDao {
-  static Future<List<BookInfo>> loadBookShelf() async {
-    File file =
-        File(await GlobalInfo.getDirectory() + GlobalInfo.appSetting.shelfFile);
-    if (file.existsSync()) {
-      String content = file.readAsStringSync();
-      List<BookInfo> list;
-      try {
-        List<BookInfo> infos = new List();
-        List<dynamic> convert = jsonDecode(content);
-        convert.forEach((e) {
-          BookInfo info = BookInfo.fromJson(e);
-          infos.add(info);
-        });
-        list = infos;
-      } catch (e) {
-        list = List();
-        LogDao.saveLogToFile(e.toString());
-      }
-      return list;
-    } else {
+  String _shelfFile = "/shelf.txt";
+
+  Directory _directory;
+
+  List<BookInfo> books = List();
+
+  BookShelfDao() {
+    getExternalStorageDirectory().then((value) {
+      _directory = value;
+      _loadBookShelf();
+    });
+  }
+
+  void _loadBookShelf() async {
+    File file = File(_directory.path + _shelfFile);
+
+    if (!file.existsSync()) {
       file.createSync(recursive: true);
-      return List<BookInfo>();
+    }
+
+    String content = file.readAsStringSync();
+    try {
+      List<dynamic> convert = jsonDecode(content);
+      convert.forEach((e) {
+        BookInfo info = BookInfo.fromJson(e);
+        books.add(info);
+      });
+    } catch (e) {
+      GlobalInfo.logDao.saveLogToFile(e.toString());
     }
   }
 
-  static void saveBookShelfToFile(List<BookInfo> list) async {
-    GlobalInfo.getDirectory().then((value) {
-      File file = File(value + GlobalInfo.appSetting.shelfFile);
-      file.writeAsStringSync(jsonEncode(list));
-    });
+  void addBook(BookInfo bookInfo){
+    books.add(bookInfo);
+    _saveBookShelfToFile();
+  }
+
+  void delBook(BookInfo bookInfo){
+    books.remove(bookInfo);
+    _saveBookShelfToFile();
+  }
+
+  void _saveBookShelfToFile() async {
+    File file = File(_directory.path + _shelfFile);
+    var json = jsonEncode(books);
+    file.writeAsStringSync(json);
   }
 }

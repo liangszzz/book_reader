@@ -1,12 +1,9 @@
-import 'package:book_reader/dao/app_setting_dao.dart';
-import 'package:book_reader/entity/app_setting.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:book_reader/dao/book_dao.dart';
+import 'package:book_reader/dao/book_shelf_dao.dart';
+import 'package:book_reader/dao/log_dao.dart';
+import 'package:dio/dio.dart';
 
 class GlobalInfo {
-  static AppSetting appSetting;
-
-  static String _directory;
-
   static final String settingFile = "/setting.json";
 
   //APP 版本
@@ -14,18 +11,10 @@ class GlobalInfo {
 
   static final Duration duration = Duration(milliseconds: 100);
 
-  static Future<String> getDirectory() async {
-    if (_directory == null) {
-      var externalStorageDirectory = await getExternalStorageDirectory();
-      _directory = externalStorageDirectory.path;
-    }
-    return _directory;
-  }
+  static final BookShelfDao bookShelfDao = BookShelfDao();
+  static final LogDao logDao = LogDao();
 
-  static void loadAppSetting() {
-    var loadAppSetting = AppSettingDao.loadAppSetting();
-    loadAppSetting.then((value) {
-      appSetting = value;
-    });
-  }
+  static final Dio dioDao = Dio();
+
+  static final BookDao bookDao=BookDao();
 }

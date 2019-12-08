@@ -64,7 +64,7 @@ class _BookReaderState extends State<BookReader> {
 
   void _onTap() {
     var height = MediaQuery.of(context).size.height;
-    _controller.animateTo(_controller.position.pixels + height-160,
+    _controller.animateTo(_controller.position.pixels + height - 160,
         duration: Duration(milliseconds: 10), curve: Curves.ease);
   }
 
@@ -131,14 +131,14 @@ class _BookReaderState extends State<BookReader> {
   }
 
   void _saveReadInfo(Chapter chapter) {
-    GlobalInfo.bookShelfDao.saveReadProcess(this.widget.bookInfo, chapter);
+    if (chapter != null) this.widget.bookInfo.lastReadChapter = chapter;
+    this.widget.bookInfo.lastReadTime = DateTime.now();
   }
 
   void _refresh() {
     Chapter chapter = this.widget.bookInfo.chapters[_index];
     _loadContent(chapter);
     _saveReadInfo(chapter);
-    _controller.animateTo(0,
-            duration: GlobalInfo.duration, curve: Curves.ease);
+    _controller.animateTo(0, duration: GlobalInfo.duration, curve: Curves.ease);
   }
 }

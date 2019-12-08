@@ -11,7 +11,20 @@ class BookShelf extends StatefulWidget {
 }
 
 class _BookShelfState extends State<BookShelf> {
+  List<BookInfo> books = List();
+
   TextEditingController _controller = TextEditingController();
+
+  @override
+  void initState() {
+    var loadBookShelf = GlobalInfo.bookShelfDao.loadBookShelf();
+    super.initState();
+    setState(() {
+      loadBookShelf.then((value) {
+        books = value;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,8 +48,8 @@ class _BookShelfState extends State<BookShelf> {
               onPressed: _add,
             ),
             IconButton(
-              icon: Icon(Icons.search),
-              onPressed: _search,
+              icon: Icon(Icons.save),
+              onPressed: _save,
             )
           ],
         ),
@@ -47,12 +60,11 @@ class _BookShelfState extends State<BookShelf> {
     return ListView.separated(
         itemBuilder: (context, i) => _buildRow(i),
         separatorBuilder: (context, i) => Divider(),
-        itemCount: GlobalInfo.bookShelfDao.books.length);
+        itemCount: books.length);
   }
 
   _buildRow(int index) {
-    BookInfo info = GlobalInfo.bookShelfDao.books[index];
-
+    BookInfo info = books[index];
     String lastChapterName = info.lastChapter.name;
     if (lastChapterName.length > 18) {
       lastChapterName = lastChapterName.substring(0, 18) + "...";
@@ -95,13 +107,21 @@ class _BookShelfState extends State<BookShelf> {
             ),
           ),
         ),
-        PopupMenuButton<String>(
-          onSelected: null,
+        PopupMenuButton<ShelfBtn>(
+          onSelected: _selectBtn,
           itemBuilder: (str) {
-            return <PopupMenuItem<String>>[
+            return <PopupMenuItem<ShelfBtn>>[
               PopupMenuItem(
-                value: "delete",
+                value: ShelfBtn(info, "info"),
                 child: Text("书籍详情"),
+              ),
+              PopupMenuItem(
+                value: ShelfBtn(info, "update"),
+                child: Text("更新"),
+              ),
+              PopupMenuItem(
+                value: ShelfBtn(info, "delete"),
+                child: Text("删除"),
               )
             ];
           },
@@ -110,8 +130,8 @@ class _BookShelfState extends State<BookShelf> {
     );
   }
 
-  void _search() {
-    print("#search");
+  void _save() {
+    GlobalInfo.bookShelfDao.saveBookShelfToFile(books);
   }
 
   bool _flag = true;
@@ -123,11 +143,42 @@ class _BookShelfState extends State<BookShelf> {
       Future<BookInfo> info = GlobalInfo.bookDao.addBook(net);
       info.then((value) {
         setState(() {
-          GlobalInfo.bookShelfDao.addBook(value);
+          books.add(value);
           _controller.text = "https://www.biquge.info/";
         });
         _flag = true;
+        GlobalInfo.bookShelfDao.saveBookShelfToFile(books);
       });
     }
+  }
+
+  void _selectBtn(ShelfBtn shelfBtn) async {
+    if (shelfBtn.btnName == "delete") {
+      setState(() {
+        books.remove(shelfBtn.info);
+      });
+      _save();
+    } else if (shelfBtn.btnName == "update") {
+      var aBook = await GlobalInfo.bookDao.addBook(shelfBtn.info.netPath);
+      var lastReadChapter = shelfBtn.info.lastReadChapter;
+      var lastReadTime = shelfBtn.info.lastReadTime;
+      setState(() {
+        aBook.lastReadChapter = lastReadChapter;
+        aBook.lastReadTime = lastReadTime;
+        shelfBtn.info = aBook;
+      });
+      _save();
+    }
+  }
+}
+
+class ShelfBtn {
+  BookInfo info;
+
+  String btnName;
+
+  ShelfBtn(BookInfo info, String btnName) {
+    this.info = info;
+    this.btnName = btnName;
   }
 }

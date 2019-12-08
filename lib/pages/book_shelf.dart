@@ -11,24 +11,36 @@ class BookShelf extends StatefulWidget {
 }
 
 class _BookShelfState extends State<BookShelf> {
-  bool _showCheckBox = true;
   TextEditingController _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    _controller.text = "https://www.biquge.info/";
     return Scaffold(
-      appBar: AppBar(
-        title: Text("书架"),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: _search,
-          )
-        ],
-      ),
-      body: _buildBody(),
-      bottomNavigationBar: _buildBottomBar(),
-    );
+        appBar: AppBar(
+          title: Text("书架"),
+          actions: <Widget>[
+            SizedBox(
+              width: 180,
+              child: TextField(
+                controller: _controller,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: '书籍网址',
+                ),
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.add),
+              onPressed: _add,
+            ),
+            IconButton(
+              icon: Icon(Icons.search),
+              onPressed: _search,
+            )
+          ],
+        ),
+        body: _buildBody());
   }
 
   Widget _buildBody() {
@@ -41,19 +53,13 @@ class _BookShelfState extends State<BookShelf> {
   _buildRow(int index) {
     BookInfo info = GlobalInfo.bookShelfDao.books[index];
 
+    String lastChapterName = info.lastChapter.name;
+    if (lastChapterName.length > 18) {
+      lastChapterName = lastChapterName.substring(0, 18) + "...";
+    }
+
     return Row(
       children: <Widget>[
-        _showCheckBox
-            ? Checkbox(
-                value: info.check,
-                onChanged: (b) {
-                  setState(() {
-                    info.check = b;
-                  });
-                })
-            : SizedBox(
-                width: 45,
-              ),
         Expanded(
           child: GestureDetector(
             onTap: () {
@@ -82,7 +88,7 @@ class _BookShelfState extends State<BookShelf> {
                   children: <Widget>[
                     Text("${info.bookName}"),
                     Text("${info.author}"),
-                    Text("${info.lastChapter.name}"),
+                    Text("$lastChapterName"),
                   ],
                 )
               ],
@@ -108,37 +114,20 @@ class _BookShelfState extends State<BookShelf> {
     print("#search");
   }
 
-  void _add() {
-    String net = _controller.text;
-    Future<BookInfo> info = GlobalInfo.bookDao.addBook(net);
-    info.then((value) {
-      setState(() {
-        GlobalInfo.bookShelfDao.addBook(value);
-      });
-    });
-  }
+  bool _flag = true;
 
-  _buildBottomBar() {
-    return Row(
-      children: <Widget>[
-        SizedBox(
-          width: 50,
-        ),
-        SizedBox(
-          width: 300,
-          child: TextField(
-            controller: _controller,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: '网址',
-            ),
-          ),
-        ),
-        IconButton(
-          icon: Icon(Icons.add),
-          onPressed: _add,
-        ),
-      ],
-    );
+  void _add() {
+    if (_flag) {
+      _flag = false;
+      String net = _controller.text;
+      Future<BookInfo> info = GlobalInfo.bookDao.addBook(net);
+      info.then((value) {
+        setState(() {
+          GlobalInfo.bookShelfDao.addBook(value);
+          _controller.text = "https://www.biquge.info/";
+        });
+        _flag = true;
+      });
+    }
   }
 }

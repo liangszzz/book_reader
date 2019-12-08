@@ -63,7 +63,8 @@ class _BookReaderState extends State<BookReader> {
   }
 
   void _onTap() {
-    _controller.animateTo(_controller.position.pixels + 580,
+    var height = MediaQuery.of(context).size.height;
+    _controller.animateTo(_controller.position.pixels + height-160,
         duration: Duration(milliseconds: 10), curve: Curves.ease);
   }
 

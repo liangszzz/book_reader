@@ -1,4 +1,4 @@
-class PageContent {
+class BookContent {
   String content;
 
   int page;
@@ -7,9 +7,8 @@ class PageContent {
 
   int allPage;
 
-  PageContent(content) {
+
+  BookContent(content) {
     this.content = content;
-
-
   }
 }

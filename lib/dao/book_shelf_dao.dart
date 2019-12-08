@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:book_reader/entity/book_chapter.dart';
 import 'package:book_reader/entity/book_info.dart';
 import 'package:book_reader/global/global_info.dart';
 import 'package:path_provider/path_provider.dart';
@@ -38,12 +39,12 @@ class BookShelfDao {
     }
   }
 
-  void addBook(BookInfo bookInfo){
+  void addBook(BookInfo bookInfo) {
     books.add(bookInfo);
     _saveBookShelfToFile();
   }
 
-  void delBook(BookInfo bookInfo){
+  void delBook(BookInfo bookInfo) {
     books.remove(bookInfo);
     _saveBookShelfToFile();
   }
@@ -52,5 +53,16 @@ class BookShelfDao {
     File file = File(_directory.path + _shelfFile);
     var json = jsonEncode(books);
     file.writeAsStringSync(json);
+  }
+
+  void saveReadProcess(BookInfo bookInfo, Chapter chapter) {
+    var book = GlobalInfo.bookShelfDao.books.firstWhere((e) {
+      return e.bookName == bookInfo.bookName;
+    });
+    if (chapter != null) {
+      book.lastReadChapter = chapter;
+    }
+    book.lastReadTime = DateTime.now();
+    _saveBookShelfToFile();
   }
 }

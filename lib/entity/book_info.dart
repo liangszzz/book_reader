@@ -24,14 +24,14 @@ class BookInfo {
   String imgPath;
 
   //最后阅读中章节名称
-  String lastReadChapterName;
+  Chapter lastReadChapter;
 
   DateTime lastReadTime;
 
   DateTime lastUpdateTime;
 
   //最新章节
-  String lastChapter;
+  Chapter lastChapter;
 
   //章节列表
   List<Chapter> chapters;
@@ -46,7 +46,10 @@ class BookInfo {
     this.savePath = map["savePath"];
     this.netPath = map["netPath"];
     this.imgPath = map["imgPath"];
-    this.lastReadChapterName = map["lastReadChapterName"];
+
+    var lastReadChapter = jsonDecode(map["lastReadChapter"]);
+
+    this.lastReadChapter = Chapter.fromJson(lastReadChapter);
 
     if (!(map["lastReadTime"] == "")) {
       this.lastReadTime = DateTime.parse(map["lastReadTime"]);
@@ -54,7 +57,10 @@ class BookInfo {
     if (!(map["lastUpdateTime"] == "")) {
       this.lastUpdateTime = DateTime.parse(map["lastUpdateTime"]);
     }
-    this.lastChapter = map["lastChapter"];
+
+    var lastChapter = jsonDecode(map["lastChapter"]);
+
+    this.lastChapter = Chapter.fromJson(lastChapter);
 
     List<dynamic> cs = jsonDecode(map['chapters']);
 
@@ -71,13 +77,13 @@ class BookInfo {
     map["savePath"] = this.savePath;
     map["netPath"] = this.netPath;
     map["imgPath"] = this.imgPath;
-    map["lastReadChapterName"] = this.lastReadChapterName;
+    map["lastReadChapter"] = jsonEncode(this.lastReadChapter);
     map["lastReadTime"] =
         this.lastReadTime == null ? "" : this.lastReadTime.toIso8601String();
     map["lastUpdateTime"] = this.lastUpdateTime == null
         ? ""
         : this.lastUpdateTime.toIso8601String();
-    map["lastChapter"] = this.lastChapter;
+    map["lastChapter"] = jsonEncode(this.lastChapter);
     map["chapters"] = jsonEncode(this.chapters);
 
     return map;

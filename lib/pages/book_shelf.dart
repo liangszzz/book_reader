@@ -12,6 +12,7 @@ class BookShelf extends StatefulWidget {
 
 class _BookShelfState extends State<BookShelf> {
   bool _showCheckBox = true;
+  TextEditingController _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -20,16 +21,13 @@ class _BookShelfState extends State<BookShelf> {
         title: Text("书架"),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.add),
-            onPressed: _add,
-          ),
-          IconButton(
             icon: Icon(Icons.search),
             onPressed: _search,
           )
         ],
       ),
       body: _buildBody(),
+      bottomNavigationBar: _buildBottomBar(),
     );
   }
 
@@ -84,7 +82,7 @@ class _BookShelfState extends State<BookShelf> {
                   children: <Widget>[
                     Text("${info.bookName}"),
                     Text("${info.author}"),
-                    Text("${info.lastChapter}"),
+                    Text("${info.lastChapter.name}"),
                   ],
                 )
               ],
@@ -111,12 +109,36 @@ class _BookShelfState extends State<BookShelf> {
   }
 
   void _add() {
-    String net = "https://www.biquge.info/71_71513/";
+    String net = _controller.text;
     Future<BookInfo> info = GlobalInfo.bookDao.addBook(net);
     info.then((value) {
       setState(() {
         GlobalInfo.bookShelfDao.addBook(value);
       });
     });
+  }
+
+  _buildBottomBar() {
+    return Row(
+      children: <Widget>[
+        SizedBox(
+          width: 50,
+        ),
+        SizedBox(
+          width: 300,
+          child: TextField(
+            controller: _controller,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: '网址',
+            ),
+          ),
+        ),
+        IconButton(
+          icon: Icon(Icons.add),
+          onPressed: _add,
+        ),
+      ],
+    );
   }
 }

@@ -24,13 +24,20 @@ class DBDao {
     return _directory.path;
   }
 
+  Future<String> getDBPath() async {
+    if (_directory == null) {
+      _directory = await getExternalStorageDirectory();
+    }
+    return _dbPath;
+  }
+
   Future<Database> getConnection() async {
     if (_directory == null) {
       _directory = await getExternalStorageDirectory();
       _dbPath = _directory.path + _dbName;
     }
 
-    if (_database == null || !_database.isOpen) {
+    if (_database == null) {
       _database = await openDatabase(_dbPath, version: 3,
           onCreate: (Database db, int version) async {
         await db.execute(
@@ -44,10 +51,13 @@ class DBDao {
             "'$chapterColumnName'  TEXT,'$chapterColumnNetPath'  TEXT, '$chapterColumnSavePath'  TEXT, PRIMARY KEY ('$chapterColumnId'));");
       });
     }
+    if (!_database.isOpen) {
+      _database = await openDatabase(_dbPath);
+    }
     return _database;
   }
 
   void closeConnection() async {
-    _database.close();
+    await _database.close();
   }
 }

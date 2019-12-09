@@ -22,7 +22,6 @@ class BookShelfDao {
         .rawQuery("select count(*) from book where name='${bookInfo.name}'"));
     if (count == 0) {
       bookInfo.id = await _database.insert(tableBook, bookInfo.toMap());
-      GlobalInfo.chapterDao.saveBookChapters(bookInfo);
     } else {
       _database.update(tableBook, bookInfo.toMap());
     }

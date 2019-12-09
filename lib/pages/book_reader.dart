@@ -25,9 +25,10 @@ class _BookReaderState extends State<BookReader> {
   int _index = 0;
 
   void loadChapters() async {
-    var loadChaptersByBook =
+    List<Chapter> loadChaptersByBook =
         await GlobalInfo.chapterDao.loadChaptersByBook(this.widget.bookInfo);
     this.widget.bookInfo.chapters = loadChaptersByBook;
+    if (loadChaptersByBook == null || loadChaptersByBook.length == 0) return;
     _index = this.widget.bookInfo.lastReadChapter;
     setState(() {
       _loadContent(this.widget.bookInfo.chapters[_index]);
@@ -155,7 +156,7 @@ class _BookReaderState extends State<BookReader> {
   void _saveReadInfo(Chapter chapter) {
     if (chapter != null) this.widget.bookInfo.lastReadChapter = chapter.index;
     this.widget.bookInfo.lastReadTime = DateTime.now();
-    GlobalInfo.bookDao.delBook(this.widget.bookInfo);
+    GlobalInfo.bookDao.saveBook(this.widget.bookInfo);
   }
 
   void _refresh() {

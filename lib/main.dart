@@ -41,6 +41,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   dispose1() async {
-    await GlobalInfo.dbDao.closeConnection();
+    GlobalInfo.dbDao.closeConnection();
   }
 }

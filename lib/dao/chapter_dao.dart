@@ -24,11 +24,12 @@ class ChapterDao {
     var database = await GlobalInfo.dbDao.getConnection();
     await database
         .delete(tableChapter, where: "bookId=?", whereArgs: [bookInfo.id]);
+//    var batch = database.batch();
     bookInfo.chapters.forEach((Chapter e) {
       e.bookId = bookInfo.id;
-      database.batch().insert(tableChapter, e.toMap());
+      database.insert(tableChapter, e.toMap());
     });
-    await database.batch().commit();
+//    await database.batch().commit();
   }
 
   Future<BookInfo> parseBookFromNet(String url) async {

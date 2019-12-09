@@ -153,7 +153,6 @@ class _BookShelfState extends State<BookShelf> {
       setState(() {
         books.remove(shelfBtn.info);
       });
-      GlobalInfo.bookDao.delBook(shelfBtn.info);
     } else if (shelfBtn.btnName == "update") {
       var aBook = await GlobalInfo.chapterDao.parseBookFromNet(shelfBtn.info.netPath);
       var lastReadChapter = shelfBtn.info.lastReadChapter;

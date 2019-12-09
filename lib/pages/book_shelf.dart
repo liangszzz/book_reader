@@ -11,7 +11,6 @@ class BookShelf extends StatefulWidget {
 }
 
 class _BookShelfState extends State<BookShelf> {
-
   final List<BookInfo> books = List();
 
   TextEditingController _controller = TextEditingController();
@@ -67,11 +66,14 @@ class _BookShelfState extends State<BookShelf> {
 
   _buildRow(int index) {
     BookInfo info = books[index];
-    String lastChapterName = info.lastUpdateChapter;
-    if (lastChapterName.length > 18) {
-      lastChapterName = lastChapterName.substring(0, 18) + "...";
+    String lastChapterName = "";
+    if (info.lastUpdateChapter != null) {
+      if (info.lastUpdateChapter.length > 18) {
+        lastChapterName = info.lastUpdateChapter.substring(0, 18) + "...";
+      } else {
+        lastChapterName = info.lastUpdateChapter;
+      }
     }
-
     return Row(
       children: <Widget>[
         Expanded(
@@ -139,6 +141,7 @@ class _BookShelfState extends State<BookShelf> {
       _flag = false;
       String net = _controller.text;
       BookInfo info = await GlobalInfo.chapterDao.parseBookFromNet(net);
+      if (info.netPath == null) return;
       setState(() {
         books.add(info);
         _controller.text = "";
@@ -153,8 +156,10 @@ class _BookShelfState extends State<BookShelf> {
       setState(() {
         books.remove(shelfBtn.info);
       });
+      GlobalInfo.bookDao.delBook(shelfBtn.info);
     } else if (shelfBtn.btnName == "update") {
-      var aBook = await GlobalInfo.chapterDao.parseBookFromNet(shelfBtn.info.netPath);
+      var aBook =
+          await GlobalInfo.chapterDao.parseBookFromNet(shelfBtn.info.netPath);
       var lastReadChapter = shelfBtn.info.lastReadChapter;
       var lastReadTime = shelfBtn.info.lastReadTime;
       setState(() {

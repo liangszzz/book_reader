@@ -8,9 +8,9 @@ import 'package:book_reader/entity/book_chapter.dart';
 
 import 'book_info_parse.dart';
 
-class BqgParse extends BookParseInterface {
+class Bqg5Parse extends BookParseInterface {
   @override
-  String getUrlHead() => "https://www.biquge.info";
+  String getUrlHead() => "https://www.kanshuwo.com";
 
   @override
   Future<BookInfo> parseBook(String url) async {
@@ -27,14 +27,14 @@ class BqgParse extends BookParseInterface {
     List<Element> es = document.querySelectorAll("#info > p");
 
     for (int i = 0; i < es.length; i++) {
-      if (i == 0) info.author = es[i].innerHtml.split(":")[1];
+      if (i == 0) info.author = es[i].innerHtml.split("：")[1];
       if (i == 2) {
         var t1 = es[i].innerHtml;
-        var indexOf = t1.indexOf(":");
+        var indexOf = t1.indexOf("：");
         info.lastUpdateTime = DateTime.parse(t1.substring(indexOf + 1));
       }
     }
-    Element desc = document.querySelector("#intro > p");
+    Element desc = document.querySelector("#intro");
     info.desc = desc.innerHtml.replaceAll("<br>", "\\n");
 
     info.netPath = url;
@@ -42,20 +42,20 @@ class BqgParse extends BookParseInterface {
     info.savePath = "/" + info.name + "/";
 
     Element imgPath = document.querySelector("#fmimg > img");
-    info.imgPath = imgPath.attributes['src'];
+    info.imgPath = getUrlHead() + imgPath.attributes['src'];
 
     info.chapters = List();
 
     List<Element> chapters = document.querySelectorAll("#list > dl >dd");
 
     for (int i = 0; i < chapters.length; i++) {
+      if (i < 12) continue;
       Element element = chapters[i];
       Chapter chapter = Chapter();
-      Node node = element.firstChild;
-
-      chapter.index = i;
+      Node node = element.querySelector("a");
+      chapter.index = i-12;
       chapter.name = node.text;
-      chapter.netPath = url + "/" + node.attributes['href'];
+      chapter.netPath = getUrlHead() + node.attributes['href'];
       chapter.savePath = info.savePath + chapter.name;
       info.chapters.add(chapter);
     }
@@ -74,9 +74,12 @@ class BqgParse extends BookParseInterface {
     Element content = document.querySelector("#content");
     var innerHtml = content.innerHtml;
     innerHtml = innerHtml
-        .replaceAll("&nbsp;", " ")
-        .replaceAll("<!--over-->", "")
-        .replaceAll("<!--go-->", "")
+        .replaceAll("\n;", " ")
+        .replaceAll("\t;", " ")
+        .replaceAll("<script>", "")
+        .replaceAll("</script>", "")
+        .replaceAll("readx();", "")
+        .replaceAll("chaptererror();", "")
         .replaceAll("<br>", "\n");
     return BookContent(innerHtml);
   }

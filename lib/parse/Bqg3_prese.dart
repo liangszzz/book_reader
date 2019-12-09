@@ -8,9 +8,9 @@ import 'package:book_reader/entity/book_chapter.dart';
 
 import 'book_info_parse.dart';
 
-class BqgParse extends BookParseInterface {
+class Bqg3Parse extends BookParseInterface {
   @override
-  String getUrlHead() => "https://www.biquge.info";
+  String getUrlHead() => "https://www.ibiquke.com";
 
   @override
   Future<BookInfo> parseBook(String url) async {
@@ -28,9 +28,9 @@ class BqgParse extends BookParseInterface {
 
     for (int i = 0; i < es.length; i++) {
       if (i == 0) info.author = es[i].innerHtml.split(":")[1];
-      if (i == 2) {
+      if (i == 3) {
         var t1 = es[i].innerHtml;
-        var indexOf = t1.indexOf(":");
+        var indexOf = t1.indexOf("：");
         info.lastUpdateTime = DateTime.parse(t1.substring(indexOf + 1));
       }
     }
@@ -42,7 +42,7 @@ class BqgParse extends BookParseInterface {
     info.savePath = "/" + info.name + "/";
 
     Element imgPath = document.querySelector("#fmimg > img");
-    info.imgPath = imgPath.attributes['src'];
+    info.imgPath = getUrlHead() + imgPath.attributes['src'];
 
     info.chapters = List();
 
@@ -54,7 +54,7 @@ class BqgParse extends BookParseInterface {
       Node node = element.firstChild;
 
       chapter.index = i;
-      chapter.name = node.text;
+      chapter.name = node.attributes['title'];
       chapter.netPath = url + "/" + node.attributes['href'];
       chapter.savePath = info.savePath + chapter.name;
       info.chapters.add(chapter);
@@ -62,7 +62,6 @@ class BqgParse extends BookParseInterface {
 
     info.lastReadChapter = 0;
     info.lastUpdateChapter = info.chapters.last.name;
-
     return info;
   }
 

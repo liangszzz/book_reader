@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:book_reader/entity/book_chapter.dart';
 import 'package:book_reader/entity/book_info.dart';
 import 'package:book_reader/global/global_info.dart';
 import 'package:sqflite/sqflite.dart';
@@ -18,22 +19,25 @@ class BookShelfDao {
 
   saveBook(BookInfo bookInfo) async {
     Database _database = await GlobalInfo.dbDao.getConnection();
-    var count = Sqflite.firstIntValue(await _database
-        .rawQuery("select count(*) from book where name='${bookInfo.name}'"));
+    var count = Sqflite.firstIntValue(await _database.rawQuery(
+        "select count(*) from $tableBook where $bookColumnName='${bookInfo.name}'"));
     if (count == 0) {
       bookInfo.id = await _database.insert(tableBook, bookInfo.toMap());
+      GlobalInfo.chapterDao.saveBookChapters(bookInfo);
     } else {
-      _database.update(tableBook, bookInfo.toMap());
+      _database.update(tableBook, bookInfo.toMap(),
+          where: "$bookColumnId=? or $bookColumnName=?",
+          whereArgs: [bookInfo.id, bookInfo.name]);
     }
   }
 
   void delBook(BookInfo bookInfo) async {
     var _database = await GlobalInfo.dbDao.getConnection();
-    await _database.transaction((tx) async {
-      await _database
-          .delete(tableBook, where: "id=?", whereArgs: [bookInfo.id]);
-    });
+    await _database
+        .delete(tableBook, where: "$bookColumnId=?", whereArgs: [bookInfo.id]);
+    await _database.delete(tableChapter,
+        where: "$chapterColumnBookId=?", whereArgs: [bookInfo.id]);
     File file = File(await GlobalInfo.dbDao.getFilePath() + bookInfo.savePath);
-    await file.delete(recursive: true);
+    if (file.existsSync()) await file.delete(recursive: true);
   }
 }

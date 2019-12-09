@@ -1,6 +1,7 @@
 import 'package:book_reader/dao/book_dao.dart';
 import 'package:book_reader/dao/book_shelf_dao.dart';
 import 'package:book_reader/dao/log_dao.dart';
+import 'package:book_reader/pages/book_shelf.dart';
 import 'package:dio/dio.dart';
 
 class GlobalInfo {
@@ -16,5 +17,7 @@ class GlobalInfo {
 
   static final Dio dioDao = Dio();
 
-  static final BookDao bookDao=BookDao();
+  static final BookDao bookDao = BookDao();
+
+  static final BookShelf bookShelf = BookShelf();
 }

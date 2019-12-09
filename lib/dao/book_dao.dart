@@ -35,4 +35,12 @@ class BookDao {
     }
     return BookContent(await file.readAsString());
   }
+
+  Future<bool> hasDownLoad(Chapter chapter) async {
+    if (_directory == null) {
+      _directory = await getExternalStorageDirectory();
+    }
+    File file = File(_directory.path + chapter.savePath + ".txt");
+    return file.exists();
+  }
 }

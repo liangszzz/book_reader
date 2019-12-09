@@ -29,7 +29,7 @@ dependencies:
   path_provider: ^1.4.5
   html: ^0.14.0+3
   flutter_html: ^0.11.0
-
+  sqflite: ^1.1.7+3
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -2,6 +2,7 @@ import 'package:book_reader/entity/book_chapter.dart';
 import 'package:book_reader/entity/book_content.dart';
 import 'package:book_reader/entity/book_info.dart';
 import 'package:book_reader/global/global_info.dart';
+import 'package:book_reader/pages/book_chapters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -26,11 +27,9 @@ class _BookReaderState extends State<BookReader> {
   @override
   void initState() {
     super.initState();
-
     _index = this.widget.bookInfo.chapters.indexWhere((e) {
       return e.name == this.widget.bookInfo.lastReadChapter.name;
     });
-
     setState(() {
       _loadContent(this.widget.bookInfo.lastReadChapter);
     });
@@ -46,19 +45,27 @@ class _BookReaderState extends State<BookReader> {
       body: Container(
         child: GestureDetector(
           onTap: _onTap,
-          child: ListView.builder(
+          child: SingleChildScrollView(
             controller: _controller,
-            itemBuilder: (context, i) {
-              return Wrap(
-                children: <Widget>[Text(_content.content)],
-              );
-            },
-            itemCount: 1,
+            child: Wrap(
+              direction: Axis.horizontal,
+              children: <Widget>[
+                Text(
+                  _content.content,
+                  style: TextStyle(color: Colors.black, fontSize: 16),
+                )
+              ],
+            ),
             scrollDirection: Axis.vertical,
+            padding: EdgeInsets.only(left: 11, right: 10, bottom: 10),
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomBar(),
+      bottomNavigationBar: Builder(
+        builder: (BuildContext buildContext) {
+          return _buildBottomBar(buildContext);
+        },
+      ),
     );
   }
 
@@ -76,25 +83,35 @@ class _BookReaderState extends State<BookReader> {
         _title = chapter.name;
       });
     });
+
+    _saveReadInfo(chapter);
   }
 
-  _buildBottomBar() {
+  _buildBottomBar(context) {
     return Row(
       children: <Widget>[
         IconButton(
           icon: Icon(Icons.navigate_before),
-          onPressed: _pre,
+          onPressed: () {
+            _pre(context);
+          },
         ),
         IconButton(
           icon: Icon(Icons.refresh),
           onPressed: _refresh,
+        ),
+        IconButton(
+          icon: Icon(Icons.dehaze),
+          onPressed: _showChapters,
         ),
         Expanded(
           child: SizedBox(),
         ),
         IconButton(
           icon: Icon(Icons.navigate_next),
-          onPressed: _next,
+          onPressed: () {
+            _next(context);
+          },
         )
       ],
     );
@@ -106,25 +123,25 @@ class _BookReaderState extends State<BookReader> {
     super.dispose();
   }
 
-  void _pre() {
+  void _pre(context) {
     if (_index == 0) {
+      Scaffold.of(context).showSnackBar(new SnackBar(content: Text("已到最前")));
       return;
     } else {
       Chapter chapter = this.widget.bookInfo.chapters[--_index];
       _loadContent(chapter);
-      _saveReadInfo(chapter);
       _controller.animateTo(0,
           duration: GlobalInfo.duration, curve: Curves.ease);
     }
   }
 
-  void _next() {
-    if (this.widget.bookInfo.chapters.length <= _index) {
+  void _next(context) {
+    if (this.widget.bookInfo.chapters.length <= _index + 1) {
+      Scaffold.of(context).showSnackBar(new SnackBar(content: Text("已到最新")));
       return;
     } else {
       Chapter chapter = this.widget.bookInfo.chapters[++_index];
       _loadContent(chapter);
-      _saveReadInfo(chapter);
       _controller.animateTo(0,
           duration: GlobalInfo.duration, curve: Curves.ease);
     }
@@ -133,6 +150,7 @@ class _BookReaderState extends State<BookReader> {
   void _saveReadInfo(Chapter chapter) {
     if (chapter != null) this.widget.bookInfo.lastReadChapter = chapter;
     this.widget.bookInfo.lastReadTime = DateTime.now();
+    GlobalInfo.bookShelf.save();
   }
 
   void _refresh() {
@@ -140,5 +158,19 @@ class _BookReaderState extends State<BookReader> {
     _loadContent(chapter);
     _saveReadInfo(chapter);
     _controller.animateTo(0, duration: GlobalInfo.duration, curve: Curves.ease);
+  }
+
+  void _showChapters() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => BookChapters(bookInfo: this.widget.bookInfo)),
+    );
+    if(result!=null){
+      setState(() {
+        _index = result;
+        _loadContent(this.widget.bookInfo.chapters[result]);
+      });
+    }
   }
 }

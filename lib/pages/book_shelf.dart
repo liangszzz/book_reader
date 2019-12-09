@@ -6,13 +6,17 @@ import 'package:flutter/material.dart';
 import 'book_reader.dart';
 
 class BookShelf extends StatefulWidget {
+  final List<BookInfo> books = List();
+
   @override
   State<StatefulWidget> createState() => _BookShelfState();
+
+  void save() {
+    GlobalInfo.bookShelfDao.saveBookShelfToFile(books);
+  }
 }
 
 class _BookShelfState extends State<BookShelf> {
-  List<BookInfo> books = List();
-
   TextEditingController _controller = TextEditingController();
 
   @override
@@ -21,14 +25,13 @@ class _BookShelfState extends State<BookShelf> {
     super.initState();
     setState(() {
       loadBookShelf.then((value) {
-        books = value;
+        this.widget.books.addAll(value);
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    _controller.text = "https://www.biquge.info/";
     return Scaffold(
         appBar: AppBar(
           title: Text("书架"),
@@ -39,17 +42,18 @@ class _BookShelfState extends State<BookShelf> {
                 controller: _controller,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: '书籍网址',
+                  hintText: '书籍网址',
                 ),
               ),
             ),
             IconButton(
               icon: Icon(Icons.add),
               onPressed: _add,
-            ),
-            IconButton(
-              icon: Icon(Icons.save),
-              onPressed: _save,
+            ),            IconButton(
+              icon: Icon(Icons.info_outline),
+              onPressed: (){
+
+              },
             )
           ],
         ),
@@ -60,11 +64,11 @@ class _BookShelfState extends State<BookShelf> {
     return ListView.separated(
         itemBuilder: (context, i) => _buildRow(i),
         separatorBuilder: (context, i) => Divider(),
-        itemCount: books.length);
+        itemCount: this.widget.books.length);
   }
 
   _buildRow(int index) {
-    BookInfo info = books[index];
+    BookInfo info = this.widget.books[index];
     String lastChapterName = info.lastChapter.name;
     if (lastChapterName.length > 18) {
       lastChapterName = lastChapterName.substring(0, 18) + "...";
@@ -130,10 +134,6 @@ class _BookShelfState extends State<BookShelf> {
     );
   }
 
-  void _save() {
-    GlobalInfo.bookShelfDao.saveBookShelfToFile(books);
-  }
-
   bool _flag = true;
 
   void _add() {
@@ -143,11 +143,11 @@ class _BookShelfState extends State<BookShelf> {
       Future<BookInfo> info = GlobalInfo.bookDao.addBook(net);
       info.then((value) {
         setState(() {
-          books.add(value);
-          _controller.text = "https://www.biquge.info/";
+          this.widget.books.add(value);
+          _controller.text = "";
         });
         _flag = true;
-        GlobalInfo.bookShelfDao.saveBookShelfToFile(books);
+        this.widget.save();
       });
     }
   }
@@ -155,9 +155,9 @@ class _BookShelfState extends State<BookShelf> {
   void _selectBtn(ShelfBtn shelfBtn) async {
     if (shelfBtn.btnName == "delete") {
       setState(() {
-        books.remove(shelfBtn.info);
+        this.widget.books.remove(shelfBtn.info);
       });
-      _save();
+      this.widget.save();
     } else if (shelfBtn.btnName == "update") {
       var aBook = await GlobalInfo.bookDao.addBook(shelfBtn.info.netPath);
       var lastReadChapter = shelfBtn.info.lastReadChapter;
@@ -167,7 +167,7 @@ class _BookShelfState extends State<BookShelf> {
         aBook.lastReadTime = lastReadTime;
         shelfBtn.info = aBook;
       });
-      _save();
+      this.widget.save();
     }
   }
 }

@@ -29,6 +29,9 @@ class BookParseFactory {
 
     Bqg5Parse b5 = Bqg5Parse();
     register(b5.getUrlHead(), b5);
+
+//    Bqg6Parse b6 = Bqg6Parse();
+//    register(b6.getUrlHead(), b6);
   }
 
   Future<BookInfo> parseBookInfo(String url) async {

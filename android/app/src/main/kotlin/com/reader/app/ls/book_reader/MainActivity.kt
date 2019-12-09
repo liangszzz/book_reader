@@ -1,4 +1,4 @@
-package com.example.book_reader
+package com.reader.app.ls.book_reader
 
 import android.os.Bundle
 

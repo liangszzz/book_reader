@@ -1,4 +1,4 @@
-# book_reader
+# demo
 
 A new Flutter project.
 

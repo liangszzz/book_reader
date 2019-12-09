@@ -1,5 +1,5 @@
-
 import 'package:book_reader/global/global_info.dart';
+import 'package:book_reader/pages/book_shelf.dart';
 import 'package:flutter/material.dart';
 import 'global/theme_data.dart';
 
@@ -31,6 +31,16 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return GlobalInfo.bookShelf;
+    return BookShelf();
+  }
+
+  @override
+  void dispose() {
+    dispose1();
+    super.dispose();
+  }
+
+  dispose1() async {
+    await GlobalInfo.dbDao.closeConnection();
   }
 }

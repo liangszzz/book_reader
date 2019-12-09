@@ -2,6 +2,7 @@ import 'package:book_reader/entity/book_info.dart';
 import 'package:flutter/material.dart';
 
 class BookChapters extends StatelessWidget {
+
   final BookInfo bookInfo;
 
   const BookChapters({Key key, this.bookInfo}) : super(key: key);

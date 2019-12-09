@@ -6,27 +6,26 @@ import 'package:flutter/material.dart';
 import 'book_reader.dart';
 
 class BookShelf extends StatefulWidget {
-  final List<BookInfo> books = List();
-
   @override
   State<StatefulWidget> createState() => _BookShelfState();
-
-  void save() {
-    GlobalInfo.bookShelfDao.saveBookShelfToFile(books);
-  }
 }
 
 class _BookShelfState extends State<BookShelf> {
+
+  final List<BookInfo> books = List();
+
   TextEditingController _controller = TextEditingController();
 
   @override
   void initState() {
-    var loadBookShelf = GlobalInfo.bookShelfDao.loadBookShelf();
     super.initState();
+    loadBookShelf();
+  }
+
+  void loadBookShelf() async {
+    var list = await GlobalInfo.bookDao.loadBookShelf();
     setState(() {
-      loadBookShelf.then((value) {
-        this.widget.books.addAll(value);
-      });
+      books.addAll(list);
     });
   }
 
@@ -49,11 +48,10 @@ class _BookShelfState extends State<BookShelf> {
             IconButton(
               icon: Icon(Icons.add),
               onPressed: _add,
-            ),            IconButton(
+            ),
+            IconButton(
               icon: Icon(Icons.info_outline),
-              onPressed: (){
-
-              },
+              onPressed: () {},
             )
           ],
         ),
@@ -64,12 +62,12 @@ class _BookShelfState extends State<BookShelf> {
     return ListView.separated(
         itemBuilder: (context, i) => _buildRow(i),
         separatorBuilder: (context, i) => Divider(),
-        itemCount: this.widget.books.length);
+        itemCount: books.length);
   }
 
   _buildRow(int index) {
-    BookInfo info = this.widget.books[index];
-    String lastChapterName = info.lastChapter.name;
+    BookInfo info = books[index];
+    String lastChapterName = info.lastUpdateChapter;
     if (lastChapterName.length > 18) {
       lastChapterName = lastChapterName.substring(0, 18) + "...";
     }
@@ -102,7 +100,7 @@ class _BookShelfState extends State<BookShelf> {
                 ),
                 Column(
                   children: <Widget>[
-                    Text("${info.bookName}"),
+                    Text("${info.name}"),
                     Text("${info.author}"),
                     Text("$lastChapterName"),
                   ],
@@ -136,30 +134,28 @@ class _BookShelfState extends State<BookShelf> {
 
   bool _flag = true;
 
-  void _add() {
+  void _add() async {
     if (_flag) {
       _flag = false;
       String net = _controller.text;
-      Future<BookInfo> info = GlobalInfo.bookDao.addBook(net);
-      info.then((value) {
-        setState(() {
-          this.widget.books.add(value);
-          _controller.text = "";
-        });
-        _flag = true;
-        this.widget.save();
+      BookInfo info = await GlobalInfo.chapterDao.parseBookFromNet(net);
+      setState(() {
+        books.add(info);
+        _controller.text = "";
       });
+      _flag = true;
+      GlobalInfo.bookDao.saveBook(info);
     }
   }
 
   void _selectBtn(ShelfBtn shelfBtn) async {
     if (shelfBtn.btnName == "delete") {
       setState(() {
-        this.widget.books.remove(shelfBtn.info);
+        books.remove(shelfBtn.info);
       });
-      this.widget.save();
+      GlobalInfo.bookDao.delBook(shelfBtn.info);
     } else if (shelfBtn.btnName == "update") {
-      var aBook = await GlobalInfo.bookDao.addBook(shelfBtn.info.netPath);
+      var aBook = await GlobalInfo.chapterDao.parseBookFromNet(shelfBtn.info.netPath);
       var lastReadChapter = shelfBtn.info.lastReadChapter;
       var lastReadTime = shelfBtn.info.lastReadTime;
       setState(() {
@@ -167,8 +163,13 @@ class _BookShelfState extends State<BookShelf> {
         aBook.lastReadTime = lastReadTime;
         shelfBtn.info = aBook;
       });
-      this.widget.save();
+      GlobalInfo.bookDao.saveBook(shelfBtn.info);
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }
 

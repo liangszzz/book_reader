@@ -1,46 +1,40 @@
 import 'dart:io';
 
-import 'package:book_reader/entity/book_chapter.dart';
-import 'package:book_reader/entity/book_content.dart';
 import 'package:book_reader/entity/book_info.dart';
-import 'package:book_reader/parse/book_info_parse.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:book_reader/global/global_info.dart';
+import 'package:sqflite/sqflite.dart';
 
-class BookDao {
-  Directory _directory;
+class BookShelfDao {
+  BookShelfDao();
 
-  BookParseFactory bookParseFactory = BookParseFactory();
+  Future<List<BookInfo>> loadBookShelf() async {
+    var _database = await GlobalInfo.dbDao.getConnection();
+    List<Map<String, dynamic>> query = await _database.query(tableBook);
+    return query.map((e) {
+      BookInfo bookInfo = BookInfo.formMap(e);
+      return bookInfo;
+    }).toList();
+  }
 
-  BookDao() {
-    getExternalStorageDirectory().then((value) {
-      _directory = value;
+  saveBook(BookInfo bookInfo) async {
+    Database _database = await GlobalInfo.dbDao.getConnection();
+    var count = Sqflite.firstIntValue(await _database
+        .rawQuery("select count(*) from book where name='${bookInfo.name}'"));
+    if (count == 0) {
+      bookInfo.id = await _database.insert(tableBook, bookInfo.toMap());
+      GlobalInfo.chapterDao.saveBookChapters(bookInfo);
+    } else {
+      _database.update(tableBook, bookInfo.toMap());
+    }
+  }
+
+  void delBook(BookInfo bookInfo) async {
+    var _database = await GlobalInfo.dbDao.getConnection();
+    await _database.transaction((tx) async {
+      await _database
+          .delete(tableBook, where: "id=?", whereArgs: [bookInfo.id]);
     });
-  }
-
-  Future<BookInfo> addBook(String url) async {
-    return await bookParseFactory.parseBookInfo(url);
-  }
-
-  Future<BookContent> loadContent(Chapter chapter) async {
-    if (_directory == null) {
-      _directory = await getExternalStorageDirectory();
-    }
-    File file = File(_directory.path + chapter.savePath + ".txt");
-    if (!file.existsSync()) {
-      file.createSync(recursive: true);
-      BookContent c =
-          await bookParseFactory.parseChapterContent(chapter.netPath);
-      file.writeAsString(c.content);
-      return c;
-    }
-    return BookContent(await file.readAsString());
-  }
-
-  Future<bool> hasDownLoad(Chapter chapter) async {
-    if (_directory == null) {
-      _directory = await getExternalStorageDirectory();
-    }
-    File file = File(_directory.path + chapter.savePath + ".txt");
-    return file.exists();
+    File file = File(await GlobalInfo.dbDao.getFilePath() + bookInfo.savePath);
+    await file.delete(recursive: true);
   }
 }

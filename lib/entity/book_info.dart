@@ -1,12 +1,25 @@
-import 'dart:convert';
-
 import 'package:book_reader/entity/book_chapter.dart';
 
+final String tableBook = "book";
+final String bookColumnId = '_id';
+final String bookColumnName = 'name';
+final String bookColumnAuthor = 'author';
+final String bookColumnDesc = 'desc';
+final String bookColumnSavePath = 'savePath';
+final String bookColumnNetPath = 'netPath';
+final String bookColumnImgPath = 'imgPath';
+final String bookColumnLastReadChapter = 'lastReadChapter';
+final String bookColumnLastReadTime = 'lastReadTime';
+final String bookColumnLastUpdateTime = 'lastUpdateTime';
+final String bookColumnLastUpdateChapter = 'lastUpdateChapter';
+
 class BookInfo {
+  int id;
+
   bool check = false;
 
   //书名
-  String bookName;
+  String name;
 
   //作者
   String author;
@@ -24,68 +37,58 @@ class BookInfo {
   String imgPath;
 
   //最后阅读中章节名称
-  Chapter lastReadChapter;
+  int lastReadChapter;
 
   DateTime lastReadTime;
 
   DateTime lastUpdateTime;
 
   //最新章节
-  Chapter lastChapter;
+  String lastUpdateChapter;
 
   //章节列表
   List<Chapter> chapters;
 
   BookInfo();
 
-  BookInfo.fromJson(Map<String, dynamic> map) {
-    this.bookName = map["bookName"];
-    this.author = map["author"];
-    this.desc = map["desc"];
-
-    this.savePath = map["savePath"];
-    this.netPath = map["netPath"];
-    this.imgPath = map["imgPath"];
-
-    var lastReadChapter = jsonDecode(map["lastReadChapter"]);
-
-    this.lastReadChapter = Chapter.fromJson(lastReadChapter);
-
-    if (!(map["lastReadTime"] == "")) {
-      this.lastReadTime = DateTime.parse(map["lastReadTime"]);
+  Map<String, dynamic> toMap() {
+    var map = <String, dynamic>{
+      bookColumnName: name,
+      bookColumnAuthor: author,
+      bookColumnDesc: desc,
+      bookColumnSavePath: savePath,
+      bookColumnNetPath: netPath,
+      bookColumnImgPath: imgPath,
+      bookColumnLastReadChapter: lastReadChapter,
+      bookColumnLastReadTime:
+          this.lastReadTime == null ? "" : this.lastReadTime.toIso8601String(),
+      bookColumnLastUpdateTime: this.lastUpdateTime == null
+          ? ""
+          : this.lastUpdateTime.toIso8601String(),
+      bookColumnLastUpdateChapter: lastUpdateChapter,
+    };
+    if (id != null) {
+      map[bookColumnId] = id;
     }
-    if (!(map["lastUpdateTime"] == "")) {
-      this.lastUpdateTime = DateTime.parse(map["lastUpdateTime"]);
-    }
-
-    var lastChapter = jsonDecode(map["lastChapter"]);
-
-    this.lastChapter = Chapter.fromJson(lastChapter);
-
-    List<dynamic> cs = jsonDecode(map['chapters']);
-
-    this.chapters = cs.map((f) => Chapter.fromJson(f)).toList();
+    return map;
   }
 
-  Map toJson() {
-    Map map = new Map();
+  BookInfo.formMap(Map<String, dynamic> map) {
+    this.id = map[bookColumnId];
+    this.name = map[bookColumnName];
+    this.author = map[bookColumnAuthor];
+    this.desc = map[bookColumnDesc];
+    this.savePath = map[bookColumnSavePath];
+    this.netPath = map[bookColumnNetPath];
+    this.imgPath = map[bookColumnImgPath];
+    this.lastReadChapter = map[bookColumnLastReadChapter];
 
-    map["bookName"] = this.bookName;
-    map["author"] = this.author;
-    map["desc"] = this.desc;
-
-    map["savePath"] = this.savePath;
-    map["netPath"] = this.netPath;
-    map["imgPath"] = this.imgPath;
-    map["lastReadChapter"] = jsonEncode(this.lastReadChapter);
-    map["lastReadTime"] =
-        this.lastReadTime == null ? "" : this.lastReadTime.toIso8601String();
-    map["lastUpdateTime"] = this.lastUpdateTime == null
-        ? ""
-        : this.lastUpdateTime.toIso8601String();
-    map["lastChapter"] = jsonEncode(this.lastChapter);
-    map["chapters"] = jsonEncode(this.chapters);
-
-    return map;
+    if (map[bookColumnLastReadTime] != "") {
+      this.lastReadTime = DateTime.parse(map[bookColumnLastReadTime]);
+    }
+    if (map[bookColumnLastUpdateTime] != "") {
+      this.lastUpdateTime = DateTime.parse(map[bookColumnLastUpdateTime]);
+    }
+    this.lastUpdateChapter = map[bookColumnLastUpdateChapter];
   }
 }

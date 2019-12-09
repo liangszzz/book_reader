@@ -22,7 +22,7 @@ class BqgParse extends BookParseInterface {
 
     Element bookName = document.querySelector("#info > h1");
 
-    info.bookName = bookName.innerHtml;
+    info.name = bookName.innerHtml;
 
     List<Element> es = document.querySelectorAll("#info > p");
 
@@ -43,7 +43,7 @@ class BqgParse extends BookParseInterface {
 
     info.netPath = url;
 
-    info.savePath = "/" + info.bookName + "/";
+    info.savePath = "/" + info.name + "/";
 
     Element imgPath = document.querySelector("#fmimg > img");
     info.imgPath = imgPath.attributes['src'];
@@ -52,20 +52,20 @@ class BqgParse extends BookParseInterface {
 
     Element chapters = document.querySelector("#list > dl");
 
-    chapters.children.forEach((Element element) {
+    for (int i = 0; i < chapters.children.length; i++) {
+      Element element = chapters.children[i];
       Chapter chapter = Chapter();
-
       Node node = element.firstChild;
 
+      chapter.index = i;
       chapter.name = node.attributes['title'];
       chapter.netPath = url + "/" + node.attributes['href'];
       chapter.savePath = info.savePath + chapter.name;
-
       info.chapters.add(chapter);
-    });
+    }
 
-    info.lastReadChapter = info.chapters.first;
-    info.lastChapter = info.chapters.last;
+    info.lastReadChapter = 0;
+    info.lastUpdateChapter = info.chapters.last.name;
 
     return info;
   }

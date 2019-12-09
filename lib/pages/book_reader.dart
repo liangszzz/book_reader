@@ -24,15 +24,20 @@ class _BookReaderState extends State<BookReader> {
 
   int _index = 0;
 
+  void loadChapters() async {
+    var loadChaptersByBook =
+        await GlobalInfo.chapterDao.loadChaptersByBook(this.widget.bookInfo);
+    this.widget.bookInfo.chapters = loadChaptersByBook;
+    _index = this.widget.bookInfo.lastReadChapter;
+    setState(() {
+      _loadContent(this.widget.bookInfo.chapters[_index]);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-    _index = this.widget.bookInfo.chapters.indexWhere((e) {
-      return e.name == this.widget.bookInfo.lastReadChapter.name;
-    });
-    setState(() {
-      _loadContent(this.widget.bookInfo.lastReadChapter);
-    });
+    loadChapters();
   }
 
   @override
@@ -76,7 +81,7 @@ class _BookReaderState extends State<BookReader> {
   }
 
   void _loadContent(Chapter chapter) {
-    var loadContent = GlobalInfo.bookDao.loadContent(chapter);
+    var loadContent = GlobalInfo.chapterDao.loadContent(chapter);
     loadContent.then((value) {
       setState(() {
         _content = value;
@@ -148,9 +153,9 @@ class _BookReaderState extends State<BookReader> {
   }
 
   void _saveReadInfo(Chapter chapter) {
-    if (chapter != null) this.widget.bookInfo.lastReadChapter = chapter;
+    if (chapter != null) this.widget.bookInfo.lastReadChapter = chapter.index;
     this.widget.bookInfo.lastReadTime = DateTime.now();
-    GlobalInfo.bookShelf.save();
+    GlobalInfo.bookDao.delBook(this.widget.bookInfo);
   }
 
   void _refresh() {
@@ -166,7 +171,7 @@ class _BookReaderState extends State<BookReader> {
       MaterialPageRoute(
           builder: (context) => BookChapters(bookInfo: this.widget.bookInfo)),
     );
-    if(result!=null){
+    if (result != null) {
       setState(() {
         _index = result;
         _loadContent(this.widget.bookInfo.chapters[result]);

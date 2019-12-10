@@ -56,18 +56,6 @@ class _BookReaderState extends State<BookReader> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_title),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.settings),
-            onPressed: () {
-              setState(() {
-                _showSetting = !_showSetting;
-              });
-            },
-          ),
-          IconButton(icon: Icon(Icons.backspace), onPressed: _resetSetting),
-          IconButton(icon: Icon(Icons.save), onPressed: _saveSetting)
-        ],
       ),
       body: Stack(
         children: <Widget>[
@@ -108,6 +96,12 @@ class _BookReaderState extends State<BookReader> {
   }
 
   void _onTap() {
+    if (_showSetting) {
+      setState(() {
+        _showSetting = false;
+      });
+      return;
+    }
     var height = MediaQuery.of(context).size.height;
     _controller.animateTo(_controller.position.pixels + height - 160,
         duration: Duration(milliseconds: 10), curve: Curves.ease);
@@ -145,6 +139,21 @@ class _BookReaderState extends State<BookReader> {
         IconButton(
           icon: Icon(Icons.dehaze),
           onPressed: _showChapters,
+        ),
+        PopupMenuButton<String>(
+          onSelected: _selectReadSetting,
+          itemBuilder: (str) {
+            return <PopupMenuItem<String>>[
+              PopupMenuItem(
+                value: "setting",
+                child: Text("阅读设置"),
+              ),
+              PopupMenuItem(
+                value: "reset",
+                child: Text("默认设置"),
+              )
+            ];
+          },
         ),
         Expanded(
           child: SizedBox(),
@@ -217,11 +226,13 @@ class _BookReaderState extends State<BookReader> {
 
   void loadSetting() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _currentBackGroundColor = Color(prefs.getInt('currentBackGroundColor'));
-      _currentTextColor = Color(prefs.getInt('currentTextColor'));
-      _currentFontSize = prefs.getDouble('currentFontSize');
-    });
+    if (prefs.containsKey("currentBackGroundColor")) {
+      setState(() {
+        _currentBackGroundColor = Color(prefs.getInt('currentBackGroundColor'));
+        _currentTextColor = Color(prefs.getInt('currentTextColor'));
+        _currentFontSize = prefs.getDouble('currentFontSize');
+      });
+    }
   }
 
   void _saveSetting() async {
@@ -261,6 +272,7 @@ class _BookReaderState extends State<BookReader> {
                     setState(() {
                       _currentFontSize = val;
                     });
+                    _saveSetting();
                   }),
             ],
           ),
@@ -280,6 +292,7 @@ class _BookReaderState extends State<BookReader> {
             setState(() {
               _currentTextColor = Colors.black;
             });
+            _saveSetting();
           },
           child: Text(
             "黑色",
@@ -291,6 +304,7 @@ class _BookReaderState extends State<BookReader> {
             setState(() {
               _currentTextColor = Colors.white;
             });
+            _saveSetting();
           },
           child: Text(
             "白色",
@@ -302,6 +316,7 @@ class _BookReaderState extends State<BookReader> {
             setState(() {
               _currentTextColor = Colors.red;
             });
+            _saveSetting();
           },
           child: Text(
             "红色",
@@ -313,6 +328,7 @@ class _BookReaderState extends State<BookReader> {
             setState(() {
               _currentTextColor = Colors.blue;
             });
+            _saveSetting();
           },
           child: Text(
             "蓝色",
@@ -324,6 +340,7 @@ class _BookReaderState extends State<BookReader> {
             setState(() {
               _currentTextColor = Colors.grey;
             });
+            _saveSetting();
           },
           child: Text(
             "灰色",
@@ -335,6 +352,7 @@ class _BookReaderState extends State<BookReader> {
             setState(() {
               _currentTextColor = Colors.green;
             });
+            _saveSetting();
           },
           child: Text(
             "绿色",
@@ -346,6 +364,7 @@ class _BookReaderState extends State<BookReader> {
             setState(() {
               _currentTextColor = Colors.brown;
             });
+            _saveSetting();
           },
           child: Text(
             "棕色",
@@ -367,6 +386,7 @@ class _BookReaderState extends State<BookReader> {
             setState(() {
               _currentBackGroundColor = Colors.black;
             });
+            _saveSetting();
           },
           child: Text(
             "黑色",
@@ -378,6 +398,7 @@ class _BookReaderState extends State<BookReader> {
             setState(() {
               _currentBackGroundColor = Colors.white;
             });
+            _saveSetting();
           },
           child: Text(
             "白色",
@@ -389,6 +410,7 @@ class _BookReaderState extends State<BookReader> {
             setState(() {
               _currentBackGroundColor = Colors.red;
             });
+            _saveSetting();
           },
           child: Text(
             "红色",
@@ -400,6 +422,7 @@ class _BookReaderState extends State<BookReader> {
             setState(() {
               _currentBackGroundColor = Colors.blue;
             });
+            _saveSetting();
           },
           child: Text(
             "蓝色",
@@ -411,6 +434,7 @@ class _BookReaderState extends State<BookReader> {
             setState(() {
               _currentBackGroundColor = Colors.grey;
             });
+            _saveSetting();
           },
           child: Text(
             "灰色",
@@ -422,6 +446,7 @@ class _BookReaderState extends State<BookReader> {
             setState(() {
               _currentBackGroundColor = Colors.green;
             });
+            _saveSetting();
           },
           child: Text(
             "绿色",
@@ -433,6 +458,7 @@ class _BookReaderState extends State<BookReader> {
             setState(() {
               _currentBackGroundColor = Colors.brown;
             });
+            _saveSetting();
           },
           child: Text(
             "棕色",
@@ -441,5 +467,19 @@ class _BookReaderState extends State<BookReader> {
         )
       ]),
     );
+  }
+
+  void _selectReadSetting(String value) {
+    switch (value) {
+      case "setting":
+        setState(() {
+          _showSetting = true;
+        });
+        break;
+      case "reset":
+        _resetSetting();
+        _saveSetting();
+        break;
+    }
   }
 }

@@ -17,16 +17,16 @@ class BookChapters extends StatelessWidget {
             IconButton(
               icon: Icon(Icons.arrow_upward),
               onPressed: () {
-                  _controller.animateTo(0,
-                          duration: GlobalInfo.duration, curve: Curves.ease);
+                _controller.animateTo(0,
+                    duration: GlobalInfo.duration, curve: Curves.ease);
               },
             ),
             IconButton(
               icon: Icon(Icons.arrow_downward),
               onPressed: () {
-                  var height = MediaQuery.of(context).size.height;
-                  _controller.animateTo(_controller.position.pixels + height - 160,
-                          duration: Duration(milliseconds: 10), curve: Curves.ease);
+                var i = 40.0 * this.bookInfo.chapters.length;
+                _controller.animateTo(i,
+                    duration: Duration(milliseconds: 300), curve: Curves.ease);
               },
             )
           ],
@@ -38,8 +38,11 @@ class BookChapters extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(context, i);
                 },
-                child: Text(this.bookInfo.chapters[i].name,
-                    style: TextStyle(fontSize: 16)),
+                child: Container(
+                  height: 22,
+                  child: Text(this.bookInfo.chapters[i].name,
+                      style: TextStyle(fontSize: 16)),
+                ),
               );
             },
             separatorBuilder: (context, i) => Divider(),

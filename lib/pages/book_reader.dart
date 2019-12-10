@@ -5,6 +5,7 @@ import 'package:book_reader/global/global_info.dart';
 import 'package:book_reader/pages/book_chapters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BookReader extends StatefulWidget {
   final BookInfo bookInfo;
@@ -24,6 +25,10 @@ class _BookReaderState extends State<BookReader> {
 
   int _index = 0;
 
+  double _currentFontSize = 16.0;
+  Color _currentTextColor = Colors.black;
+  Color _currentBackGroundColor = Colors.white;
+
   void loadChapters() async {
     List<Chapter> loadChaptersByBook =
         await GlobalInfo.chapterDao.loadChaptersByBook(this.widget.bookInfo);
@@ -38,10 +43,12 @@ class _BookReaderState extends State<BookReader> {
   @override
   void initState() {
     super.initState();
+    loadSetting();
     loadChapters();
   }
 
-  bool loading = false;
+  bool _loading = false;
+  bool _showSetting = false;
 
   @override
   Widget build(BuildContext context) {
@@ -49,29 +56,49 @@ class _BookReaderState extends State<BookReader> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_title),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.settings),
+            onPressed: () {
+              setState(() {
+                _showSetting = !_showSetting;
+              });
+            },
+          ),
+          IconButton(icon: Icon(Icons.backspace), onPressed: _resetSetting),
+          IconButton(icon: Icon(Icons.save), onPressed: _saveSetting)
+        ],
       ),
-      body: Container(
-          alignment: Alignment.center,
-          child: GestureDetector(
-              onTap: _onTap,
-              child: SingleChildScrollView(
-                controller: _controller,
-                child: loading
-                    ? Container(
-                        child: Center(child: Text("loading")),
-                      )
-                    : Wrap(
-                        direction: Axis.horizontal,
-                        children: <Widget>[
-                          Text(
-                            _content.content,
-                            style: TextStyle(color: Colors.black, fontSize: 16),
+      body: Stack(
+        children: <Widget>[
+          Container(
+              decoration: BoxDecoration(color: _currentBackGroundColor),
+              alignment: Alignment.center,
+              child: GestureDetector(
+                  onTap: _onTap,
+                  child: SingleChildScrollView(
+                    controller: _controller,
+                    child: _loading
+                        ? Container(
+                            child: Center(child: Text("loading")),
                           )
-                        ],
-                      ),
-                scrollDirection: Axis.vertical,
-                padding: EdgeInsets.only(left: 11, right: 10, bottom: 10),
-              ))),
+                        : Wrap(
+                            direction: Axis.horizontal,
+                            children: <Widget>[
+                              Text(
+                                _content.content,
+                                style: TextStyle(
+                                    color: _currentTextColor,
+                                    fontSize: _currentFontSize),
+                              )
+                            ],
+                          ),
+                    scrollDirection: Axis.vertical,
+                    padding: EdgeInsets.only(left: 11, right: 10, bottom: 10),
+                  ))),
+          _showSetting ? _buildTextSetting() : SizedBox()
+        ],
+      ),
       bottomNavigationBar: Builder(
         builder: (BuildContext buildContext) {
           return _buildBottomBar(buildContext);
@@ -88,14 +115,14 @@ class _BookReaderState extends State<BookReader> {
 
   void _loadContent(Chapter chapter) async {
     setState(() {
-      loading = true;
+      _loading = true;
     });
     var loadContent = GlobalInfo.chapterDao.loadContent(chapter);
     loadContent.then((value) {
       setState(() {
         _content = value;
         _title = chapter.name;
-        loading = false;
+        _loading = false;
       });
     });
 
@@ -186,5 +213,233 @@ class _BookReaderState extends State<BookReader> {
         _loadContent(this.widget.bookInfo.chapters[result]);
       });
     }
+  }
+
+  void loadSetting() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _currentBackGroundColor = Color(prefs.getInt('currentBackGroundColor'));
+      _currentTextColor = Color(prefs.getInt('currentTextColor'));
+      _currentFontSize = prefs.getDouble('currentFontSize');
+    });
+  }
+
+  void _saveSetting() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('currentBackGroundColor', _currentBackGroundColor.value);
+    await prefs.setInt('currentTextColor', _currentTextColor.value);
+    await prefs.setDouble('currentFontSize', _currentFontSize);
+  }
+
+  void _resetSetting() async {
+    setState(() {
+      _currentFontSize = 16.0;
+      _currentTextColor = Colors.black;
+      _currentBackGroundColor = Colors.white;
+    });
+  }
+
+  _buildTextSetting() {
+    return Center(
+        child: Container(
+      height: 150,
+      decoration: BoxDecoration(color: Colors.blueGrey),
+      child: Column(
+        children: <Widget>[
+          _buildTextColorSetting(),
+          _buildBackGroundColorSetting(),
+          Row(
+            children: <Widget>[
+              Text("文字大小"),
+              Slider(
+                  value: _currentFontSize,
+                  min: 8,
+                  max: 30,
+                  divisions: 22,
+                  label: "$_currentFontSize",
+                  onChanged: (double val) {
+                    setState(() {
+                      _currentFontSize = val;
+                    });
+                  }),
+            ],
+          ),
+        ],
+      ),
+    ));
+  }
+
+  _buildTextColorSetting() {
+    return Expanded(
+      child: ListView(scrollDirection: Axis.horizontal, children: <Widget>[
+        Center(
+          child: Text("文字颜色"),
+        ),
+        FlatButton(
+          onPressed: () {
+            setState(() {
+              _currentTextColor = Colors.black;
+            });
+          },
+          child: Text(
+            "黑色",
+            style: TextStyle(color: Colors.black),
+          ),
+        ),
+        FlatButton(
+          onPressed: () {
+            setState(() {
+              _currentTextColor = Colors.white;
+            });
+          },
+          child: Text(
+            "白色",
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+        FlatButton(
+          onPressed: () {
+            setState(() {
+              _currentTextColor = Colors.red;
+            });
+          },
+          child: Text(
+            "红色",
+            style: TextStyle(color: Colors.red),
+          ),
+        ),
+        FlatButton(
+          onPressed: () {
+            setState(() {
+              _currentTextColor = Colors.blue;
+            });
+          },
+          child: Text(
+            "蓝色",
+            style: TextStyle(color: Colors.blue),
+          ),
+        ),
+        FlatButton(
+          onPressed: () {
+            setState(() {
+              _currentTextColor = Colors.grey;
+            });
+          },
+          child: Text(
+            "灰色",
+            style: TextStyle(color: Colors.grey),
+          ),
+        ),
+        FlatButton(
+          onPressed: () {
+            setState(() {
+              _currentTextColor = Colors.green;
+            });
+          },
+          child: Text(
+            "绿色",
+            style: TextStyle(color: Colors.green),
+          ),
+        ),
+        FlatButton(
+          onPressed: () {
+            setState(() {
+              _currentTextColor = Colors.brown;
+            });
+          },
+          child: Text(
+            "棕色",
+            style: TextStyle(color: Colors.brown),
+          ),
+        )
+      ]),
+    );
+  }
+
+  _buildBackGroundColorSetting() {
+    return Expanded(
+      child: ListView(scrollDirection: Axis.horizontal, children: <Widget>[
+        Center(
+          child: Text("背景颜色"),
+        ),
+        FlatButton(
+          onPressed: () {
+            setState(() {
+              _currentBackGroundColor = Colors.black;
+            });
+          },
+          child: Text(
+            "黑色",
+            style: TextStyle(color: Colors.black),
+          ),
+        ),
+        FlatButton(
+          onPressed: () {
+            setState(() {
+              _currentBackGroundColor = Colors.white;
+            });
+          },
+          child: Text(
+            "白色",
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+        FlatButton(
+          onPressed: () {
+            setState(() {
+              _currentBackGroundColor = Colors.red;
+            });
+          },
+          child: Text(
+            "红色",
+            style: TextStyle(color: Colors.red),
+          ),
+        ),
+        FlatButton(
+          onPressed: () {
+            setState(() {
+              _currentBackGroundColor = Colors.blue;
+            });
+          },
+          child: Text(
+            "蓝色",
+            style: TextStyle(color: Colors.blue),
+          ),
+        ),
+        FlatButton(
+          onPressed: () {
+            setState(() {
+              _currentBackGroundColor = Colors.grey;
+            });
+          },
+          child: Text(
+            "灰色",
+            style: TextStyle(color: Colors.grey),
+          ),
+        ),
+        FlatButton(
+          onPressed: () {
+            setState(() {
+              _currentBackGroundColor = Colors.green;
+            });
+          },
+          child: Text(
+            "绿色",
+            style: TextStyle(color: Colors.green),
+          ),
+        ),
+        FlatButton(
+          onPressed: () {
+            setState(() {
+              _currentBackGroundColor = Colors.brown;
+            });
+          },
+          child: Text(
+            "棕色",
+            style: TextStyle(color: Colors.brown),
+          ),
+        )
+      ]),
+    );
   }
 }

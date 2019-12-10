@@ -36,17 +36,6 @@ class AppSetting extends StatelessWidget {
                       child: Container(
                           alignment: Alignment.center,
                           height: 80,
-                          child: Text("文字设置"))),
-                  Icon(Icons.text_fields)
-                ])),
-            Divider(),
-            GestureDetector(
-                onTap: _toSupportList,
-                child: Row(children: <Widget>[
-                  Expanded(
-                      child: Container(
-                          alignment: Alignment.center,
-                          height: 80,
                           child: Text("使用说明"))),
                   Icon(Icons.info)
                 ])),

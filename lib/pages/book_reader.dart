@@ -206,6 +206,9 @@ class _BookReaderState extends State<BookReader> {
   void _refresh() {
     Chapter chapter = this.widget.bookInfo.chapters[_index];
     _loadContent(chapter);
+    setState(() {
+      _loading = false;
+    });
     _controller.animateTo(0, duration: GlobalInfo.duration, curve: Curves.ease);
   }
 

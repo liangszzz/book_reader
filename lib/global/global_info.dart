@@ -2,6 +2,7 @@ import 'package:book_reader/dao/chapter_dao.dart';
 import 'package:book_reader/dao/book_dao.dart';
 import 'package:book_reader/dao/db_dao.dart';
 import 'package:book_reader/dao/log_dao.dart';
+import 'package:book_reader/parse/book_info_parse.dart';
 import 'package:dio/dio.dart';
 
 class GlobalInfo {
@@ -21,4 +22,6 @@ class GlobalInfo {
   static final ChapterDao chapterDao = ChapterDao();
 
   static final DBDao dbDao = DBDao();
+
+  static final BookParseFactory bookParseFactory = BookParseFactory();
 }

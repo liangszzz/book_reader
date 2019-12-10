@@ -4,11 +4,8 @@ import 'package:book_reader/entity/book_chapter.dart';
 import 'package:book_reader/entity/book_content.dart';
 import 'package:book_reader/entity/book_info.dart';
 import 'package:book_reader/global/global_info.dart';
-import 'package:book_reader/parse/book_info_parse.dart';
 
 class ChapterDao {
-  BookParseFactory _bookParseFactory = BookParseFactory();
-
   ChapterDao();
 
   loadChaptersByBook(BookInfo bookInfo) async {
@@ -31,7 +28,7 @@ class ChapterDao {
   }
 
   Future<BookInfo> parseBookFromNet(String url) async {
-    return await _bookParseFactory.parseBookInfo(url);
+    return await GlobalInfo.bookParseFactory.parseBookInfo(url);
   }
 
   Future<BookContent> loadContent(Chapter chapter) async {
@@ -39,8 +36,8 @@ class ChapterDao {
         File(await GlobalInfo.dbDao.getFilePath() + chapter.savePath + ".txt");
     if (!file.existsSync()) {
       file.createSync(recursive: true);
-      BookContent c =
-          await _bookParseFactory.parseChapterContent(chapter.netPath);
+      BookContent c = await GlobalInfo.bookParseFactory
+          .parseChapterContent(chapter.netPath);
       file.writeAsString(c.content);
       return c;
     }

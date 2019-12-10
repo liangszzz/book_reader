@@ -41,7 +41,7 @@ class Bqg6Parse extends BookParseInterface {
     Element desc = document.querySelector("#intro");
     info.desc = desc.innerHtml
         .replaceAll("<br>", "\\n")
-        .replaceAll("无弹窗推荐地址：https://www.biqukan.com/72_72564/", "");
+        .replaceAll("无弹窗推荐地址", "");
 
     info.netPath = url;
 

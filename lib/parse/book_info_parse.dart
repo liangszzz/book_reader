@@ -14,6 +14,10 @@ class BookParseFactory {
     _map[path] = parse;
   }
 
+  List<BookParseInterface> getSupport() {
+    return List<BookParseInterface>.of(_map.values);
+  }
+
   BookParseFactory() {
     BqgParse b = BqgParse();
     register(b.getUrlHead(), b);

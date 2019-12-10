@@ -132,14 +132,6 @@ class _BookReaderState extends State<BookReader> {
             _pre(context);
           },
         ),
-        IconButton(
-          icon: Icon(Icons.refresh),
-          onPressed: _refresh,
-        ),
-        IconButton(
-          icon: Icon(Icons.dehaze),
-          onPressed: _showChapters,
-        ),
         PopupMenuButton<String>(
           onSelected: _selectReadSetting,
           itemBuilder: (str) {
@@ -154,6 +146,14 @@ class _BookReaderState extends State<BookReader> {
               )
             ];
           },
+        ),
+        IconButton(
+          icon: Icon(Icons.refresh),
+          onPressed: _refresh,
+        ),
+        IconButton(
+          icon: Icon(Icons.dehaze),
+          onPressed: _showChapters,
         ),
         Expanded(
           child: SizedBox(),

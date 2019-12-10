@@ -167,7 +167,7 @@ class _BookShelfState extends State<BookShelf> {
         aBook.lastReadTime = lastReadTime;
         shelfBtn.info = aBook;
       });
-      GlobalInfo.bookDao.saveBook(shelfBtn.info);
+      GlobalInfo.bookDao.updateBook(shelfBtn.info);
     }
   }
 

@@ -40,4 +40,19 @@ class BookShelfDao {
     File file = File(await GlobalInfo.dbDao.getFilePath() + bookInfo.savePath);
     if (file.existsSync()) await file.delete(recursive: true);
   }
+
+  void updateBook(BookInfo bookInfo) async{
+    Database _database = await GlobalInfo.dbDao.getConnection();
+    var count = Sqflite.firstIntValue(await _database.rawQuery(
+    "select count(*) from $tableBook where $bookColumnName='${bookInfo.name}'"));
+    if (count == 0) {
+      return;
+    }
+    else{
+      _database.update(tableBook, bookInfo.toMap(),
+          where: "$bookColumnId=? or $bookColumnName=?",
+          whereArgs: [bookInfo.id, bookInfo.name]);
+      GlobalInfo.chapterDao.saveBookChapters(bookInfo);
+    }
+  }
 }

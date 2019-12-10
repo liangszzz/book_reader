@@ -41,6 +41,8 @@ class _BookReaderState extends State<BookReader> {
     loadChapters();
   }
 
+  bool loading = false;
+
   @override
   Widget build(BuildContext context) {
     _saveReadInfo(null);
@@ -49,24 +51,27 @@ class _BookReaderState extends State<BookReader> {
         title: Text(_title),
       ),
       body: Container(
-        child: GestureDetector(
-          onTap: _onTap,
-          child: SingleChildScrollView(
-            controller: _controller,
-            child: Wrap(
-              direction: Axis.horizontal,
-              children: <Widget>[
-                Text(
-                  _content.content,
-                  style: TextStyle(color: Colors.black, fontSize: 16),
-                )
-              ],
-            ),
-            scrollDirection: Axis.vertical,
-            padding: EdgeInsets.only(left: 11, right: 10, bottom: 10),
-          ),
-        ),
-      ),
+          alignment: Alignment.center,
+          child: GestureDetector(
+              onTap: _onTap,
+              child: SingleChildScrollView(
+                controller: _controller,
+                child: loading
+                    ? Container(
+                        child: Center(child: Text("loading")),
+                      )
+                    : Wrap(
+                        direction: Axis.horizontal,
+                        children: <Widget>[
+                          Text(
+                            _content.content,
+                            style: TextStyle(color: Colors.black, fontSize: 16),
+                          )
+                        ],
+                      ),
+                scrollDirection: Axis.vertical,
+                padding: EdgeInsets.only(left: 11, right: 10, bottom: 10),
+              ))),
       bottomNavigationBar: Builder(
         builder: (BuildContext buildContext) {
           return _buildBottomBar(buildContext);
@@ -81,12 +86,16 @@ class _BookReaderState extends State<BookReader> {
         duration: Duration(milliseconds: 10), curve: Curves.ease);
   }
 
-  void _loadContent(Chapter chapter) {
+  void _loadContent(Chapter chapter) async {
+    setState(() {
+      loading = true;
+    });
     var loadContent = GlobalInfo.chapterDao.loadContent(chapter);
     loadContent.then((value) {
       setState(() {
         _content = value;
         _title = chapter.name;
+        loading = false;
       });
     });
 
@@ -162,7 +171,6 @@ class _BookReaderState extends State<BookReader> {
   void _refresh() {
     Chapter chapter = this.widget.bookInfo.chapters[_index];
     _loadContent(chapter);
-    _saveReadInfo(chapter);
     _controller.animateTo(0, duration: GlobalInfo.duration, curve: Curves.ease);
   }
 

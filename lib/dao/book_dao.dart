@@ -17,17 +17,19 @@ class BookShelfDao {
     }).toList();
   }
 
-  saveBook(BookInfo bookInfo) async {
+  Future<bool> saveBook(BookInfo bookInfo) async {
     Database _database = await GlobalInfo.dbDao.getConnection();
     var count = Sqflite.firstIntValue(await _database.rawQuery(
         "select count(*) from $tableBook where $bookColumnName='${bookInfo.name}'"));
     if (count == 0) {
       bookInfo.id = await _database.insert(tableBook, bookInfo.toMap());
       GlobalInfo.chapterDao.saveBookChapters(bookInfo);
+      return true;
     } else {
       _database.update(tableBook, bookInfo.toMap(),
           where: "$bookColumnId=? or $bookColumnName=?",
           whereArgs: [bookInfo.id, bookInfo.name]);
+      return false;
     }
   }
 

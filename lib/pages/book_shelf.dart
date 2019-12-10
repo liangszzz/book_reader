@@ -1,5 +1,6 @@
 import 'package:book_reader/entity/book_info.dart';
 import 'package:book_reader/global/global_info.dart';
+import 'package:book_reader/pages/app_setting.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -49,8 +50,16 @@ class _BookShelfState extends State<BookShelf> {
               onPressed: _add,
             ),
             IconButton(
-              icon: Icon(Icons.info_outline),
-              onPressed: () {},
+              icon: Icon(Icons.settings),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    PageRouteBuilder(
+                      opaque: false,
+                      pageBuilder: (BuildContext context, _, __) =>
+                          AppSetting(),
+                    ));
+              },
             )
           ],
         ),
@@ -68,8 +77,8 @@ class _BookShelfState extends State<BookShelf> {
     BookInfo info = books[index];
     String lastChapterName = "";
     if (info.lastUpdateChapter != null) {
-      if (info.lastUpdateChapter.length > 18) {
-        lastChapterName = info.lastUpdateChapter.substring(0, 18) + "...";
+      if (info.lastUpdateChapter.length > 15) {
+        lastChapterName = info.lastUpdateChapter.substring(0, 12) + "...";
       } else {
         lastChapterName = info.lastUpdateChapter;
       }
@@ -116,10 +125,6 @@ class _BookShelfState extends State<BookShelf> {
           itemBuilder: (str) {
             return <PopupMenuItem<ShelfBtn>>[
               PopupMenuItem(
-                value: ShelfBtn(info, "info"),
-                child: Text("书籍详情"),
-              ),
-              PopupMenuItem(
                 value: ShelfBtn(info, "update"),
                 child: Text("更新"),
               ),
@@ -139,15 +144,19 @@ class _BookShelfState extends State<BookShelf> {
   void _add() async {
     if (_flag) {
       _flag = false;
-      String net = _controller.text;
-      BookInfo info = await GlobalInfo.chapterDao.parseBookFromNet(net);
-      if (info.netPath == null) return;
-      setState(() {
-        books.add(info);
-        _controller.text = "";
-      });
-      _flag = true;
-      GlobalInfo.bookDao.saveBook(info);
+      try {
+        String net = _controller.text;
+        BookInfo info = await GlobalInfo.chapterDao.parseBookFromNet(net);
+        if (info.netPath == null) return;
+        bool flag = await GlobalInfo.bookDao.saveBook(info);
+        setState(() {
+          if (flag) books.add(info);
+          _controller.text = "";
+        });
+        _flag = true;
+      } catch (e) {
+        _flag = true;
+      }
     }
   }
 
@@ -162,9 +171,11 @@ class _BookShelfState extends State<BookShelf> {
           await GlobalInfo.chapterDao.parseBookFromNet(shelfBtn.info.netPath);
       var lastReadChapter = shelfBtn.info.lastReadChapter;
       var lastReadTime = shelfBtn.info.lastReadTime;
+      var id = shelfBtn.info.id;
       setState(() {
         aBook.lastReadChapter = lastReadChapter;
         aBook.lastReadTime = lastReadTime;
+        aBook.id = id;
         shelfBtn.info = aBook;
       });
       GlobalInfo.bookDao.updateBook(shelfBtn.info);

@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:book_reader/entity/book_info.dart';
 import 'package:book_reader/global/global_info.dart';
 import 'package:book_reader/pages/app_setting.dart';
+import 'package:book_reader/widgets/loading.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -15,6 +18,8 @@ class _BookShelfState extends State<BookShelf> {
   final List<BookInfo> books = List();
 
   TextEditingController _controller = TextEditingController();
+
+  bool _loading = false;
 
   @override
   void initState() {
@@ -49,7 +54,6 @@ class _BookShelfState extends State<BookShelf> {
               icon: Icon(Icons.add),
               onPressed: _add,
             ),
-
             IconButton(
               icon: Icon(Icons.settings),
               onPressed: () {
@@ -64,14 +68,20 @@ class _BookShelfState extends State<BookShelf> {
             )
           ],
         ),
-        body: _buildBody());
+        body: _loading ? Loading() : _buildBody());
   }
 
   Widget _buildBody() {
-    return ListView.separated(
-        itemBuilder: (context, i) => _buildRow(i),
-        separatorBuilder: (context, i) => Divider(),
-        itemCount: books.length);
+    return Container(
+      padding: EdgeInsets.all(10),
+      child: RefreshIndicator(
+        onRefresh: _onRefresh,
+        child: ListView.separated(
+            itemBuilder: (context, i) => _buildRow(i),
+            separatorBuilder: (context, i) => Divider(),
+            itemCount: books.length),
+      ),
+    );
   }
 
   _buildRow(int index) {
@@ -102,11 +112,7 @@ class _BookShelfState extends State<BookShelf> {
             },
             child: Row(
               children: <Widget>[
-                Image.network(
-                  info.imgPath,
-                  height: 120,
-                  width: 70,
-                ),
+                _buildImage(index),
                 SizedBox(
                   width: 30,
                 ),
@@ -143,16 +149,24 @@ class _BookShelfState extends State<BookShelf> {
   bool _flag = true;
 
   void _add() async {
+    setState(() {
+      _loading = true;
+    });
+
     if (_flag) {
       _flag = false;
       try {
         String net = _controller.text;
         BookInfo info = await GlobalInfo.chapterDao.parseBookFromNet(net);
-        if (info.netPath == null) return;
+        if (info.netPath == null) {
+          _flag = true;
+          return;
+        }
         bool flag = await GlobalInfo.bookDao.saveBook(info);
         setState(() {
           if (flag) books.add(info);
           _controller.text = "";
+          _loading = false;
         });
         _flag = true;
       } catch (e) {
@@ -186,6 +200,33 @@ class _BookShelfState extends State<BookShelf> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  _buildImage(int index) {
+    BookInfo info = this.books[index];
+
+    File file = File(info.imgSavePath);
+    if (file.existsSync()) {
+      return Image.file(
+        file,
+        height: 120,
+        width: 70,
+      );
+    } else {
+      return Image.network(
+        info.imgNetPath,
+        height: 120,
+        width: 70,
+      );
+    }
+  }
+
+  Future<void> _onRefresh() async {
+    var list = await GlobalInfo.bookDao.loadBookShelf();
+    books.clear();
+    setState(() {
+      books.addAll(list);
+    });
   }
 }
 

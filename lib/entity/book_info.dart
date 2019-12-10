@@ -7,7 +7,8 @@ final String bookColumnAuthor = 'author';
 final String bookColumnDesc = 'desc';
 final String bookColumnSavePath = 'savePath';
 final String bookColumnNetPath = 'netPath';
-final String bookColumnImgPath = 'imgPath';
+final String bookColumnImgNetPath = 'imgNetPath';
+final String bookColumnImgSavePath = 'imgSavePath';
 final String bookColumnLastReadChapter = 'lastReadChapter';
 final String bookColumnLastReadTime = 'lastReadTime';
 final String bookColumnLastUpdateTime = 'lastUpdateTime';
@@ -34,7 +35,9 @@ class BookInfo {
   String netPath;
 
   //封面地址
-  String imgPath;
+  String imgNetPath;
+
+  String imgSavePath;
 
   //最后阅读中章节名称
   int lastReadChapter;
@@ -58,7 +61,8 @@ class BookInfo {
       bookColumnDesc: desc,
       bookColumnSavePath: savePath,
       bookColumnNetPath: netPath,
-      bookColumnImgPath: imgPath,
+      bookColumnImgNetPath: imgNetPath,
+      bookColumnImgSavePath: imgSavePath,
       bookColumnLastReadChapter: lastReadChapter,
       bookColumnLastReadTime:
           this.lastReadTime == null ? "" : this.lastReadTime.toIso8601String(),
@@ -80,7 +84,9 @@ class BookInfo {
     this.desc = map[bookColumnDesc];
     this.savePath = map[bookColumnSavePath];
     this.netPath = map[bookColumnNetPath];
-    this.imgPath = map[bookColumnImgPath];
+    this.imgNetPath = map[bookColumnImgSavePath];
+    this.imgSavePath = map[bookColumnImgSavePath];
+
     this.lastReadChapter = map[bookColumnLastReadChapter];
 
     if (map[bookColumnLastReadTime] != "") {

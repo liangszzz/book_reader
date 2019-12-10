@@ -13,6 +13,8 @@ class DBDao {
 
   final String _dbName = "/book.db";
 
+  final String _imagePath = "/images";
+
   Database _database;
 
   DBDao();
@@ -22,6 +24,13 @@ class DBDao {
       _directory = await getExternalStorageDirectory();
     }
     return _directory.path;
+  }
+
+  Future<String> getImagePath() async {
+    if (_directory == null) {
+      _directory = await getExternalStorageDirectory();
+    }
+    return _directory.path + _imagePath;
   }
 
   Future<String> getDBPath() async {
@@ -35,6 +44,8 @@ class DBDao {
     if (_directory == null) {
       _directory = await getExternalStorageDirectory();
       _dbPath = _directory.path + _dbName;
+      File file = File(_directory.path + _imagePath + "/a.txt");
+      if (!file.existsSync()) file.createSync(recursive: true);
     }
 
     if (_database == null) {
@@ -42,7 +53,7 @@ class DBDao {
           onCreate: (Database db, int version) async {
         await db.execute(
             "CREATE TABLE 'book' ('$bookColumnId' INTEGER NOT NULL,'$bookColumnName' TEXT,'$bookColumnAuthor' "
-            "TEXT,'$bookColumnDesc' TEXT,'$bookColumnSavePath' TEXT,'$bookColumnNetPath' TEXT,'$bookColumnImgPath' TEXT,"
+            "TEXT,'$bookColumnDesc' TEXT,'$bookColumnSavePath' TEXT,'$bookColumnNetPath' TEXT,'$bookColumnImgNetPath' TEXT,'$bookColumnImgSavePath' TEXT,"
             "'$bookColumnLastReadChapter' INTEGER,'$bookColumnLastReadTime' TEXT,"
             "'$bookColumnLastUpdateTime' TEXT,'$bookColumnLastUpdateChapter' INTEGER,PRIMARY KEY ('$bookColumnId'));");
 

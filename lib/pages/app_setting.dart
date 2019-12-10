@@ -1,3 +1,5 @@
+
+import 'package:book_reader/pages/settings/how_to_use.dart';
 import 'package:book_reader/pages/settings/support_list.dart';
 import 'package:flutter/material.dart';
 
@@ -30,7 +32,15 @@ class AppSetting extends StatelessWidget {
                 ])),
             Divider(),
             GestureDetector(
-                onTap: _toSupportList,
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        opaque: false,
+                        pageBuilder: (BuildContext context, _, __) =>
+                            HowToUse(),
+                      ));
+                },
                 child: Row(children: <Widget>[
                   Expanded(
                       child: Container(
@@ -41,7 +51,13 @@ class AppSetting extends StatelessWidget {
                 ])),
             Divider(),
             GestureDetector(
-                onTap: _toSupportList,
+                onTap: () {
+                  showAboutDialog(
+                      context: context,
+                      applicationName: "Book Reader",
+                      applicationVersion: "1.0.0",
+                      children: <Widget>[Text("一个自用的小说阅读APP,请尽可能的支持正版.")]);
+                },
                 child: Row(children: <Widget>[
                   Expanded(
                       child: Container(
@@ -53,6 +69,4 @@ class AppSetting extends StatelessWidget {
           ],
         ));
   }
-
-  void _toSupportList() {}
 }

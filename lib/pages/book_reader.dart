@@ -3,6 +3,7 @@ import 'package:book_reader/entity/book_content.dart';
 import 'package:book_reader/entity/book_info.dart';
 import 'package:book_reader/global/global_info.dart';
 import 'package:book_reader/pages/book_chapters.dart';
+import 'package:book_reader/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -67,9 +68,7 @@ class _BookReaderState extends State<BookReader> {
                   child: SingleChildScrollView(
                     controller: _controller,
                     child: _loading
-                        ? Container(
-                            child: Center(child: Text("loading")),
-                          )
+                        ? Loading()
                         : Wrap(
                             direction: Axis.horizontal,
                             children: <Widget>[

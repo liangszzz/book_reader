@@ -48,7 +48,7 @@ class Bqg6Parse extends BookParseInterface {
     info.savePath = "/" + info.name + "/";
 
     Element imgPath = document.querySelector("body > div.book > div.info > div.cover > img");
-    info.imgPath = getUrlHead() + imgPath.attributes['src'];
+    info.imgNetPath = getUrlHead() + imgPath.attributes['src'];
 
     info.chapters = List();
 

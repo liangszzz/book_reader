@@ -1,5 +1,4 @@
 import 'package:book_reader/entity/book_info.dart';
-import 'package:book_reader/global/global_info.dart';
 import 'package:flutter/material.dart';
 
 class BookChapters extends StatelessWidget {
@@ -18,34 +17,36 @@ class BookChapters extends StatelessWidget {
               icon: Icon(Icons.arrow_upward),
               onPressed: () {
                 _controller.animateTo(0,
-                    duration: GlobalInfo.duration, curve: Curves.ease);
+                    duration: Duration(milliseconds: 500), curve: Curves.ease);
               },
             ),
             IconButton(
               icon: Icon(Icons.arrow_downward),
               onPressed: () {
-                var i = 40.0 * this.bookInfo.chapters.length;
-                _controller.animateTo(i,
-                    duration: Duration(milliseconds: 300), curve: Curves.ease);
+                _controller.animateTo(_controller.position.maxScrollExtent,
+                    duration: Duration(milliseconds: 500), curve: Curves.ease);
               },
             )
           ],
         ),
-        body: ListView.separated(
-            controller: _controller,
-            itemBuilder: (context, i) {
-              return GestureDetector(
-                onTap: () {
-                  Navigator.pop(context, i);
-                },
-                child: Container(
-                  height: 22,
-                  child: Text(this.bookInfo.chapters[i].name,
-                      style: TextStyle(fontSize: 16)),
-                ),
-              );
-            },
-            separatorBuilder: (context, i) => Divider(),
-            itemCount: bookInfo.chapters.length));
+        body: Container(
+          padding: EdgeInsets.all(20),
+          child: ListView.separated(
+              controller: _controller,
+              itemBuilder: (context, i) {
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context, i);
+                  },
+                  child: Container(
+                    height: 22,
+                    child: Text(this.bookInfo.chapters[i].name,
+                        style: TextStyle(fontSize: 16)),
+                  ),
+                );
+              },
+              separatorBuilder: (context, i) => Divider(),
+              itemCount: bookInfo.chapters.length),
+        ));
   }
 }

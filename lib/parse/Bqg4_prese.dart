@@ -42,7 +42,7 @@ class Bqg4Parse extends BookParseInterface {
     info.savePath = "/" + info.name + "/";
 
     Element imgPath = document.querySelector("#fmimg > img");
-    info.imgPath = imgPath.attributes['src'];
+    info.imgNetPath = imgPath.attributes['src'];
 
     info.chapters = List();
 

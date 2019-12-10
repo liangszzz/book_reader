@@ -34,7 +34,8 @@ class Bqg2Parse extends BookParseInterface {
     info.netPath = url;
     info.savePath = "/" + info.name + "/";
     Element imgPath = document.querySelector("#fmimg > img");
-    info.imgPath = imgPath.attributes['src'];
+    info.imgNetPath = imgPath.attributes['src'];
+
     info.chapters = List();
     List<Element> chapters = document.querySelectorAll("#list > dl >dd");
     for (int i = 0; i < chapters.length; i++) {

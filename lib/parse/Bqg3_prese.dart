@@ -9,8 +9,11 @@ import 'package:book_reader/entity/book_chapter.dart';
 import 'book_info_parse.dart';
 
 class Bqg3Parse extends BookParseInterface {
+
+  final String _url = "https://www.ibiquke.com";
+
   @override
-  String getUrlHead() => "https://www.ibiquke.com";
+  String getUrlHead() => _url;
 
   @override
   Future<BookInfo> parseBook(String url) async {
@@ -42,7 +45,7 @@ class Bqg3Parse extends BookParseInterface {
     info.savePath = "/" + info.name + "/";
 
     Element imgPath = document.querySelector("#fmimg > img");
-    info.imgNetPath = getUrlHead() + imgPath.attributes['src'];
+    info.imgNetPath = _url + imgPath.attributes['src'];
 
     info.chapters = List();
 

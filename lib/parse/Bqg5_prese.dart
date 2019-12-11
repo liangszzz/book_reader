@@ -9,8 +9,11 @@ import 'package:book_reader/entity/book_chapter.dart';
 import 'book_info_parse.dart';
 
 class Bqg5Parse extends BookParseInterface {
+
+  final String _url = "https://www.kanshuwo.com";
+
   @override
-  String getUrlHead() => "https://www.kanshuwo.com";
+  String getUrlHead() => _url;
 
   @override
   Future<BookInfo> parseBook(String url) async {
@@ -42,7 +45,7 @@ class Bqg5Parse extends BookParseInterface {
     info.savePath = "/" + info.name + "/";
 
     Element imgPath = document.querySelector("#fmimg > img");
-    info.imgNetPath = getUrlHead() + imgPath.attributes['src'];
+    info.imgNetPath = _url + imgPath.attributes['src'];
 
     info.chapters = List();
 
@@ -55,7 +58,7 @@ class Bqg5Parse extends BookParseInterface {
       Node node = element.querySelector("a");
       chapter.index = i-12;
       chapter.name = node.text;
-      chapter.netPath = getUrlHead() + node.attributes['href'];
+      chapter.netPath = _url + node.attributes['href'];
       chapter.savePath = info.savePath + chapter.name;
       info.chapters.add(chapter);
     }

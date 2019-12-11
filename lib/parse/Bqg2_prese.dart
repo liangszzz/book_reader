@@ -9,8 +9,11 @@ import 'package:book_reader/entity/book_chapter.dart';
 import 'book_info_parse.dart';
 
 class Bqg2Parse extends BookParseInterface {
+
+  final String _url = "https://www.xsbiquge.com";
+
   @override
-  String getUrlHead() => "https://www.xsbiquge.com";
+  String getUrlHead() => _url;
 
   @override
   Future<BookInfo> parseBook(String url) async {
@@ -44,7 +47,7 @@ class Bqg2Parse extends BookParseInterface {
       Node node = element.firstChild;
       chapter.index = i;
       chapter.name = node.text;
-      chapter.netPath = getUrlHead() + "/" + node.attributes['href'];
+      chapter.netPath = _url + "/" + node.attributes['href'];
       chapter.savePath = info.savePath + chapter.name;
       info.chapters.add(chapter);
     }

@@ -87,6 +87,7 @@ class Bqg7Parse extends BookParseInterface {
         .replaceAll("&nbsp;", " ")
         .replaceAll("一秒记住【笔趣阁MM", "")
         .replaceAll("】，精彩小说无弹窗免费阅读！", "")
+        .replaceAll("百度笔趣阁MM，更多好看小说免费阅读。", "")
         .replaceAll(
             '<a href="https://www.biqugemm.com" target="_blank">www.biqugemm.com</a>',
             "")

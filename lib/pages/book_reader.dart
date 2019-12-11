@@ -53,7 +53,7 @@ class _BookReaderState extends State<BookReader> {
 
   @override
   Widget build(BuildContext context) {
-    _saveReadInfo(null);
+    _saveReadProcess(null);
     return Scaffold(
       appBar: AppBar(
         title: Text(_title),
@@ -119,7 +119,7 @@ class _BookReaderState extends State<BookReader> {
       });
     });
 
-    _saveReadInfo(chapter);
+    _saveReadProcess(chapter);
   }
 
   _buildBottomBar(context) {
@@ -197,10 +197,10 @@ class _BookReaderState extends State<BookReader> {
     }
   }
 
-  void _saveReadInfo(Chapter chapter) {
+  void _saveReadProcess(Chapter chapter) {
     if (chapter != null) this.widget.bookInfo.lastReadChapter = chapter.index;
     this.widget.bookInfo.lastReadTime = DateTime.now();
-    GlobalInfo.bookDao.saveBook(this.widget.bookInfo);
+    GlobalInfo.bookDao.saveBook(this.widget.bookInfo, 3);
   }
 
   void _refresh() {

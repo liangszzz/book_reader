@@ -162,7 +162,7 @@ class _BookShelfState extends State<BookShelf> {
           _flag = true;
           return;
         }
-        bool flag = await GlobalInfo.bookDao.saveBook(info);
+        bool flag = await GlobalInfo.bookDao.saveBook(info, 1);
         setState(() {
           if (flag) books.add(info);
           _controller.text = "";
@@ -182,18 +182,33 @@ class _BookShelfState extends State<BookShelf> {
       });
       GlobalInfo.bookDao.delBook(shelfBtn.info);
     } else if (shelfBtn.btnName == "update") {
+      setState(() {
+        _loading = true;
+      });
+
       var aBook =
           await GlobalInfo.chapterDao.parseBookFromNet(shelfBtn.info.netPath);
-      var lastReadChapter = shelfBtn.info.lastReadChapter;
-      var lastReadTime = shelfBtn.info.lastReadTime;
-      var id = shelfBtn.info.id;
+      if (aBook == null ||
+          aBook.imgNetPath == null ||
+          aBook.imgNetPath.isEmpty) {
+        return;
+      }
+      aBook.lastReadChapter = shelfBtn.info.lastReadChapter;
+      aBook.lastReadTime = shelfBtn.info.lastReadTime;
+      aBook.id = shelfBtn.info.id;
+      aBook.imgSavePath = shelfBtn.info.imgSavePath;
       setState(() {
-        aBook.lastReadChapter = lastReadChapter;
-        aBook.lastReadTime = lastReadTime;
-        aBook.id = id;
         shelfBtn.info = aBook;
+        _loading = false;
+        books.sort((e1, e2) {
+          if (e1.lastReadTime.isAfter(e2.lastReadTime)) {
+            return -1;
+          } else {
+            return 1;
+          }
+        });
       });
-      GlobalInfo.bookDao.updateBook(shelfBtn.info);
+      GlobalInfo.bookDao.saveBook(shelfBtn.info, 2);
     }
   }
 
@@ -205,27 +220,42 @@ class _BookShelfState extends State<BookShelf> {
   _buildImage(int index) {
     BookInfo info = this.books[index];
 
-    File file = File(info.imgSavePath);
-    if (file.existsSync()) {
-      return Image.file(
-        file,
-        height: 120,
-        width: 70,
-      );
-    } else {
+    if (info.imgSavePath != null && info.imgSavePath.isNotEmpty) {
+      File file = File(info.imgSavePath);
+      if (file.existsSync()) {
+        return Image.file(
+          file,
+          height: 120,
+          width: 70,
+        );
+      }
+    }
+    if (info.imgNetPath == null) {
       return Image.network(
-        info.imgNetPath,
+        "",
         height: 120,
         width: 70,
       );
     }
+
+    return Image.network(
+      info.imgNetPath,
+      height: 120,
+      width: 70,
+    );
   }
 
   Future<void> _onRefresh() async {
-    var list = await GlobalInfo.bookDao.loadBookShelf();
-    books.clear();
+//    var list = await GlobalInfo.bookDao.loadBookShelf();
+//    books.clear();
     setState(() {
-      books.addAll(list);
+      books.sort((e1, e2) {
+        if (e1.lastReadTime.isAfter(e2.lastReadTime)) {
+          return -1;
+        } else {
+          return 1;
+        }
+      });
     });
   }
 }

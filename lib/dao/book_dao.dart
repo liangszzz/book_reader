@@ -18,27 +18,58 @@ class BookShelfDao {
     }).toList();
   }
 
-  Future<bool> saveBook(BookInfo bookInfo) async {
-    if (bookInfo.imgSavePath == null || bookInfo.imgSavePath.isEmpty) {
-      bookInfo.imgSavePath = await GlobalInfo.dbDao.getImagePath() +
-          "/" +
-          bookInfo.name +
-          bookInfo.imgNetPath.substring(bookInfo.imgNetPath.lastIndexOf("."));
-    }
+  ///    保存书籍信息
+  ///    [bookInfo] 书籍
+  ///    [flag] 1 新增,2更新,3保存阅读进度
+  Future<bool> saveBook(BookInfo bookInfo, int flag) async {
     Database _database = await GlobalInfo.dbDao.getConnection();
     var count = Sqflite.firstIntValue(await _database.rawQuery(
         "select count(*) from $tableBook where $bookColumnName='${bookInfo.name}'"));
-    if (count == 0) {
-      bookInfo.id = await _database.insert(tableBook, bookInfo.toMap());
-      GlobalInfo.dioDao.download(bookInfo.imgNetPath, bookInfo.imgSavePath);
-      GlobalInfo.chapterDao.saveBookChapters(bookInfo);
-      return true;
-    } else {
-      _database.update(tableBook, bookInfo.toMap(),
-          where: "$bookColumnId=? or $bookColumnName=?",
-          whereArgs: [bookInfo.id, bookInfo.name]);
-      return false;
+
+    switch (flag) {
+      case 1:
+        //添加
+        if (count > 0) return false;
+        if (bookInfo.imgNetPath != null && bookInfo.imgNetPath.isNotEmpty) {
+          bookInfo.imgSavePath = await GlobalInfo.dbDao.getImagePath() +
+              "/" +
+              bookInfo.name +
+              bookInfo.imgNetPath
+                  .substring(bookInfo.imgNetPath.lastIndexOf("."));
+          GlobalInfo.dioDao.download(bookInfo.imgNetPath, bookInfo.imgSavePath);
+        }
+        bookInfo.id = await _database.insert(tableBook, bookInfo.toMap());
+        GlobalInfo.chapterDao.saveBookChapters(bookInfo);
+        break;
+      case 2:
+        //书籍更新
+        if (count == 0) return false;
+        if (bookInfo.imgNetPath != null && bookInfo.imgNetPath.isNotEmpty) {
+          bookInfo.imgSavePath = await GlobalInfo.dbDao.getImagePath() +
+              "/" +
+              bookInfo.name +
+              bookInfo.imgNetPath
+                  .substring(bookInfo.imgNetPath.lastIndexOf("."));
+          File file = File(bookInfo.imgSavePath);
+          if (!file.existsSync()) {
+            GlobalInfo.dioDao
+                .download(bookInfo.imgNetPath, bookInfo.imgSavePath);
+          }
+        }
+        _database.update(tableBook, bookInfo.toMap(),
+            where: "$bookColumnId=? or $bookColumnName=?",
+            whereArgs: [bookInfo.id, bookInfo.name]);
+        GlobalInfo.chapterDao.saveBookChapters(bookInfo);
+        break;
+      case 3:
+        //保存阅读进度
+        if (count == 0) return false;
+        _database.update(tableBook, bookInfo.toMap(),
+            where: "$bookColumnId=? or $bookColumnName=?",
+            whereArgs: [bookInfo.id, bookInfo.name]);
+        break;
     }
+    return true;
   }
 
   void delBook(BookInfo bookInfo) async {
@@ -54,20 +85,6 @@ class BookShelfDao {
       file2.deleteSync();
     } catch (e) {
       GlobalInfo.logDao.saveLogToFile(e.toString());
-    }
-  }
-
-  void updateBook(BookInfo bookInfo) async {
-    Database _database = await GlobalInfo.dbDao.getConnection();
-    var count = Sqflite.firstIntValue(await _database.rawQuery(
-        "select count(*) from $tableBook where $bookColumnName='${bookInfo.name}'"));
-    if (count == 0) {
-      return;
-    } else {
-      _database.update(tableBook, bookInfo.toMap(),
-          where: "$bookColumnId=? or $bookColumnName=?",
-          whereArgs: [bookInfo.id, bookInfo.name]);
-      GlobalInfo.chapterDao.saveBookChapters(bookInfo);
     }
   }
 }

@@ -197,18 +197,12 @@ class _BookShelfState extends State<BookShelf> {
       aBook.lastReadTime = shelfBtn.info.lastReadTime;
       aBook.id = shelfBtn.info.id;
       aBook.imgSavePath = shelfBtn.info.imgSavePath;
+      shelfBtn.info = aBook;
+      await GlobalInfo.bookDao.saveBook(shelfBtn.info, 2);
+      await _onRefresh();
       setState(() {
-        shelfBtn.info = aBook;
         _loading = false;
-        books.sort((e1, e2) {
-          if (e1.lastReadTime.isAfter(e2.lastReadTime)) {
-            return -1;
-          } else {
-            return 1;
-          }
-        });
       });
-      GlobalInfo.bookDao.saveBook(shelfBtn.info, 2);
     }
   }
 
@@ -246,16 +240,14 @@ class _BookShelfState extends State<BookShelf> {
   }
 
   Future<void> _onRefresh() async {
-//    var list = await GlobalInfo.bookDao.loadBookShelf();
-//    books.clear();
     setState(() {
-      books.sort((e1, e2) {
-        if (e1.lastReadTime.isAfter(e2.lastReadTime)) {
-          return -1;
-        } else {
-          return 1;
-        }
-      });
+      _loading = true;
+    });
+    var list = await GlobalInfo.bookDao.loadBookShelf();
+    books.clear();
+    setState(() {
+      books.addAll(list);
+      _loading = false;
     });
   }
 }

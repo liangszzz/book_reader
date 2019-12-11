@@ -5,6 +5,8 @@ import 'Bqg2_prese.dart';
 import 'Bqg3_prese.dart';
 import 'Bqg4_prese.dart';
 import 'Bqg5_prese.dart';
+import 'Bqg6_prese.dart';
+import 'Bqg7_prese.dart';
 import 'Bqg_prese.dart';
 
 class BookParseFactory {
@@ -34,8 +36,11 @@ class BookParseFactory {
     Bqg5Parse b5 = Bqg5Parse();
     register(b5.getUrlHead(), b5);
 
-//    Bqg6Parse b6 = Bqg6Parse();
-//    register(b6.getUrlHead(), b6);
+    Bqg7Parse b7 = Bqg7Parse();
+    register(b7.getUrlHead(), b7);
+
+    Bqg6Parse b6 = Bqg6Parse();
+    register(b6.getUrlHead(), b6);
   }
 
   Future<BookInfo> parseBookInfo(String url) async {

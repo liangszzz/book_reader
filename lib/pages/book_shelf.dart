@@ -157,10 +157,22 @@ class _BookShelfState extends State<BookShelf> {
       _flag = false;
       try {
         String net = _controller.text;
-        BookInfo info = await GlobalInfo.chapterDao.parseBookFromNet(net);
-        if (info.netPath == null) {
+        BookInfo info;
+        try {
+          info = await GlobalInfo.chapterDao.parseBookFromNet(net);
+          if (info.netPath == null) {
+            _flag = true;
+            setState(() {
+              _loading = false;
+            });
+            return;
+          }
+        } catch (e) {
           _flag = true;
-          return;
+          setState(() {
+            _loading = false;
+          });
+          GlobalInfo.logDao.saveLogToFile(e.toString());
         }
         bool flag = await GlobalInfo.bookDao.saveBook(info, 1);
         setState(() {

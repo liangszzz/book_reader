@@ -24,4 +24,7 @@ class GlobalInfo {
   static final DBDao dbDao = DBDao();
 
   static final BookParseFactory bookParseFactory = BookParseFactory();
+
+  static String get defaultImgNetPath =>
+      "https://www.biquge.lu/files/article/image/64/64401/64401s.jpg";
 }

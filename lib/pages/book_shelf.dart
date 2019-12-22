@@ -37,38 +37,28 @@ class _BookShelfState extends State<BookShelf> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text("书架"),
-          actions: <Widget>[
-            SizedBox(
-              width: 180,
-              child: TextField(
-                controller: _controller,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: '书籍网址',
-                ),
+      appBar: AppBar(
+        title: Text("书架"),
+        actions: <Widget>[
+          SizedBox(
+            width: 260,
+            child: TextField(
+              controller: _controller,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: '书籍网址',
               ),
             ),
-            IconButton(
-              icon: Icon(Icons.add),
-              onPressed: _add,
-            ),
-            IconButton(
-              icon: Icon(Icons.settings),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    PageRouteBuilder(
-                      opaque: false,
-                      pageBuilder: (BuildContext context, _, __) =>
-                          AppSetting(),
-                    ));
-              },
-            )
-          ],
-        ),
-        body: _loading ? Loading() : _buildBody());
+          ),
+          IconButton(
+            icon: Icon(Icons.add),
+            onPressed: _add,
+          )
+        ],
+      ),
+      body: _loading ? Loading() : _buildBody(),
+      bottomNavigationBar: _buildBottom(),
+    );
   }
 
   Widget _buildBody() {
@@ -120,7 +110,10 @@ class _BookShelfState extends State<BookShelf> {
                   children: <Widget>[
                     Text("${info.name}"),
                     Text("${info.author}"),
-                    Text("$lastChapterName"),
+                    Text(
+                      "$lastChapterName",
+                      style: TextStyle(fontSize: 10),
+                    ),
                   ],
                 )
               ],
@@ -262,6 +255,52 @@ class _BookShelfState extends State<BookShelf> {
       _loading = false;
     });
   }
+
+  Widget _buildBottom() {
+    return Row(
+      children: <Widget>[
+        IconButton(
+          icon: Icon(Icons.settings),
+          onPressed: () {
+            Navigator.push(
+                context,
+                PageRouteBuilder(
+                  opaque: false,
+                  pageBuilder: (BuildContext context, _, __) => AppSetting(),
+                ));
+          },
+        ),
+        Expanded(child: SizedBox()),
+        IconButton(
+          icon: Icon(Icons.refresh),
+          onPressed: _updateAll,
+        )
+      ],
+    );
+  }
+
+  void _updateAll() async {
+    setState(() {
+      _loading = true;
+    });
+    for (int i = 0; i < books.length; i++) {
+      var aBook =
+          await GlobalInfo.chapterDao.parseBookFromNet(books[i].netPath);
+      if (aBook == null ||
+          aBook.imgNetPath == null ||
+          aBook.imgNetPath.isEmpty) {
+        return;
+      }
+      aBook.lastReadChapter = books[i].lastReadChapter;
+      aBook.lastReadTime = books[i].lastReadTime;
+      aBook.id = books[i].id;
+      aBook.imgSavePath = books[i].imgSavePath;
+      books[i] = aBook;
+      await GlobalInfo.bookDao.saveBook(books[i], 2);
+    }
+    await _onRefresh();
+  }
+
 }
 
 class ShelfBtn {

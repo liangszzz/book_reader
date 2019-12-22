@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:book_reader/entity/book_chapter.dart';
 import 'package:book_reader/entity/book_content.dart';
 import 'package:book_reader/entity/book_info.dart';
@@ -56,7 +58,10 @@ class _BookReaderState extends State<BookReader> {
     _saveReadProcess(null);
     return Scaffold(
       appBar: AppBar(
-        title: Text(_title),
+        title: Text(
+          _title,
+          style: TextStyle(fontSize: 12),
+        ),
       ),
       body: Stack(
         children: <Widget>[
@@ -119,6 +124,21 @@ class _BookReaderState extends State<BookReader> {
       });
     });
 
+    _saveReadProcess(chapter);
+  }
+
+  void _refreshContent(Chapter chapter) async {
+    setState(() {
+      _loading = true;
+    });
+    var loadContent = GlobalInfo.chapterDao.refreshContent(chapter);
+    loadContent.then((value) {
+      setState(() {
+        _content = value;
+        _title = chapter.name;
+        _loading = false;
+      });
+    });
     _saveReadProcess(chapter);
   }
 
@@ -205,7 +225,7 @@ class _BookReaderState extends State<BookReader> {
 
   void _refresh() {
     Chapter chapter = this.widget.bookInfo.chapters[_index];
-    _loadContent(chapter);
+    _refreshContent(chapter);
     setState(() {
       _loading = false;
     });

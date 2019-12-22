@@ -43,4 +43,13 @@ class ChapterDao {
     }
     return BookContent(await file.readAsString());
   }
+
+  Future<BookContent> refreshContent(Chapter chapter) async {
+    File file =
+        File(await GlobalInfo.dbDao.getFilePath() + chapter.savePath + ".txt");
+    if (file.existsSync()) {
+      file.deleteSync();
+    }
+    return loadContent(chapter);
+  }
 }

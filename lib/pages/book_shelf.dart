@@ -41,7 +41,7 @@ class _BookShelfState extends State<BookShelf> {
         title: Text("书架"),
         actions: <Widget>[
           SizedBox(
-            width: 260,
+            width: 240,
             child: TextField(
               controller: _controller,
               decoration: InputDecoration(

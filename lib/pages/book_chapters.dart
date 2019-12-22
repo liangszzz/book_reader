@@ -14,6 +14,13 @@ class BookChapters extends StatelessWidget {
           title: Text("目录"),
           actions: <Widget>[
             IconButton(
+              icon: Icon(Icons.add_location),
+              onPressed: () {
+                _controller.animateTo((this.bookInfo.lastReadChapter+1) * 35.5,
+                    duration: Duration(milliseconds: 500), curve: Curves.ease);
+              },
+            ),
+            IconButton(
               icon: Icon(Icons.arrow_upward),
               onPressed: () {
                 _controller.animateTo(0,

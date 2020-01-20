@@ -8,7 +8,7 @@ class LogDao {
   Directory _directory;
 
   LogDao() {
-    getExternalStorageDirectory().then((value) {
+    getApplicationDocumentsDirectory().then((value) {
       _directory = value;
     });
   }
@@ -16,7 +16,7 @@ class LogDao {
   void saveLogToFile(String log) async {
     print("###error###  " + log);
     if (_directory == null) {
-      _directory = await getExternalStorageDirectory();
+      _directory = await getApplicationDocumentsDirectory();
     }
     File file = File(_directory.path + _logFile);
     var randomAccessFile = await file.open(mode: FileMode.writeOnlyAppend);

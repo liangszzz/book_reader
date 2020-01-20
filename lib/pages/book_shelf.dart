@@ -216,32 +216,21 @@ class _BookShelfState extends State<BookShelf> {
     super.dispose();
   }
 
-  _buildImage(int index) {
+  Widget _buildImage(int index) {
     BookInfo info = this.books[index];
 
     if (info.imgSavePath != null && info.imgSavePath.isNotEmpty) {
-      File file = File(info.imgSavePath);
-      if (file.existsSync()) {
-        return Image.file(
-          file,
-          height: 120,
-          width: 70,
-        );
-      }
-    }
-    if (info.imgNetPath == null) {
-      return Image.network(
-        "",
+      return Image.file(
+        File(info.imgSavePath),
         height: 120,
         width: 70,
       );
-    }
-
-    return Image.network(
-      info.imgNetPath,
-      height: 120,
-      width: 70,
-    );
+    } else
+      return Image.network(
+        info.imgNetPath,
+        height: 120,
+        width: 70,
+      );
   }
 
   Future<void> _onRefresh() async {
@@ -300,7 +289,6 @@ class _BookShelfState extends State<BookShelf> {
     }
     await _onRefresh();
   }
-
 }
 
 class ShelfBtn {

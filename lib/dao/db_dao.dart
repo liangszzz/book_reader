@@ -21,28 +21,28 @@ class DBDao {
 
   Future<String> getFilePath() async {
     if (_directory == null) {
-      _directory = await getExternalStorageDirectory();
+      _directory = await getApplicationDocumentsDirectory();
     }
     return _directory.path;
   }
 
   Future<String> getImagePath() async {
     if (_directory == null) {
-      _directory = await getExternalStorageDirectory();
+      _directory = await getApplicationDocumentsDirectory();
     }
     return _directory.path + _imagePath;
   }
 
   Future<String> getDBPath() async {
     if (_directory == null) {
-      _directory = await getExternalStorageDirectory();
+      _directory = await getApplicationDocumentsDirectory();
     }
     return _dbPath;
   }
 
   Future<Database> getConnection() async {
     if (_directory == null) {
-      _directory = await getExternalStorageDirectory();
+      _directory = await getApplicationDocumentsDirectory();
       _dbPath = _directory.path + _dbName;
       File file = File(_directory.path + _imagePath + "/a.txt");
       if (!file.existsSync()) file.createSync(recursive: true);
